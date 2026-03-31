@@ -4,7 +4,8 @@
       "Bash(chmod +x /Users/md.nahidhasan/wpsp-docker-e2e/docker/wp-setup.sh /Users/md.nahidhasan/wpsp-docker-e2e/docker/wait-for-wp.sh)",
       "Bash(ls /Users/md.nahidhasan/wpsp-docker-e2e/tests/*.spec.ts)",
       "Bash(xargs -I{} cat {})",
-      "Bash(npx playwright:*)"
+      "Bash(npx playwright:*)",
+      "Bash(grep -E \"\\\\.php$\")"
     ]
   }
 }

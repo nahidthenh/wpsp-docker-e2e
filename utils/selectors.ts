@@ -55,36 +55,47 @@ export const BLOCK_EDITOR = {
 } as const;
 
 // ── SchedulePress specific selectors ───────────────────────────────────────
+// Real admin slugs (verified from plugin source):
+//   Main settings  → admin.php?page=schedulepress
+//   Calendar        → admin.php?page=schedulepress-calendar
 export const SCHEDULE_PRESS = {
-  adminMenuLink:    "#adminmenu a[href*='wp-scheduled-posts']",
-  dashboardTitle:   "h1.wp-heading-inline",
+  // Sidebar menu — top-level "SchedulePress" entry
+  adminMenuLink:   "#adminmenu a[href*='page=schedulepress']",
 
-  // Calendar view
-  calendarPage:     "#adminmenu a[href*='wpsp-calendar']",
-  calendarWrapper:  ".wpsp-calendar-wrapper, #wpsp-calendar, .fc",  // FullCalendar root
-  calendarTitle:    ".fc-toolbar-title, .wpsp-calendar-title",
-  calendarNavNext:  "button.fc-next-button, .fc-next-button",
-  calendarNavPrev:  "button.fc-prev-button, .fc-prev-button",
+  // Direct admin URLs
+  urls: {
+    settings:  "/wp-admin/admin.php?page=schedulepress",
+    calendar:  "/wp-admin/admin.php?page=schedulepress-calendar",
+  },
 
-  // Scheduled post list
+  // Settings page tabs (React-rendered, matched by visible text)
+  settingsTabs: {
+    socialProfiles: "text=Social Profiles",
+    settings:       "text=Settings",
+    calendar:       "text=Calendar",
+    autoScheduler:  "text=Auto Scheduler",
+    manualScheduler:"text=Manual Scheduler",
+    // PRO-only tabs
+    license:        "text=License",
+    manageSchedule: "text=Manage Schedule",
+  },
+
+  // Calendar view — FullCalendar v6 selectors
+  calendar: {
+    root:     ".fc",
+    toolbar:  ".fc-toolbar, .fc-header-toolbar",
+    title:    ".fc-toolbar-title",
+    prevBtn:  "button.fc-prev-button",
+    nextBtn:  "button.fc-next-button",
+    todayBtn: "button.fc-today-button",
+    event:    ".fc-event",
+    dayGrid:  ".fc-daygrid",
+  },
+
+  // Posts list
   scheduledList: {
-    wrapper:      ".wpsp-scheduled-posts, .wpsp-posts-table",
-    row:          ".wpsp-post-row, tr.type-post",
-    editLink:     "a.row-actions-edit, a.edit-action",
-  },
-
-  // Quick schedule modal / meta box
-  quickSchedule: {
-    modal:        ".wpsp-modal, #wpsp-quick-schedule",
-    dateField:    "input[name='wpsp_date'], input.wpsp-date-field",
-    timeField:    "input[name='wpsp_time'], input.wpsp-time-field",
-    saveButton:   "button.wpsp-save-schedule, button.wpsp-submit",
-  },
-
-  // Settings page
-  settings: {
-    pageLink:     "#adminmenu a[href*='wpsp-settings']",
-    saveButton:   "input[type='submit'][name='save'], input#submit",
+    wrapper:  ".wpsp-scheduled-posts, .wpsp-posts-table",
+    row:      ".wpsp-post-row, tr.type-post",
   },
 } as const;
 

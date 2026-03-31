@@ -161,17 +161,31 @@ export async function postExistsWithStatus(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Run WP-CLI inside the `wpcli` container.
- * Uses `docker-compose exec` so it reuses the running stack.
+ * Run WP-CLI via a disposable `docker run` container.
+ * This works whether or not the `wpcli` service container is running.
  */
 export function runWpCli(subcommand: string): string {
+  const network  = process.env.DOCKER_NETWORK  ?? "wpsp-docker-e2e_wpsp_network";
+  const dbHost   = process.env.WORDPRESS_DB_HOST     ?? "db:3306";
+  const dbUser   = process.env.WORDPRESS_DB_USER     ?? "wordpress";
+  const dbPass   = process.env.WORDPRESS_DB_PASSWORD ?? "wordpress";
+  const dbName   = process.env.WORDPRESS_DB_NAME     ?? "wordpress";
+
   const cmd = [
-    "docker-compose exec -T wpcli",
+    "docker run --rm",
+    `--network ${network}`,
+    "--volumes-from wpsp_wordpress",
+    `-e WORDPRESS_DB_HOST=${dbHost}`,
+    `-e WORDPRESS_DB_USER=${dbUser}`,
+    `-e WORDPRESS_DB_PASSWORD=${dbPass}`,
+    `-e WORDPRESS_DB_NAME=${dbName}`,
+    "wordpress:cli-php8.2",
     "wp",
     subcommand,
     "--path=/var/www/html",
     "--allow-root",
   ].join(" ");
+
   try {
     return execSync(cmd, { encoding: "utf8", cwd: process.cwd() }).trim();
   } catch (e: unknown) {
