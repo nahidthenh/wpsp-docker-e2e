@@ -1,0 +1,139 @@
+name: SchedulePress E2E Tests
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  # Allow manual trigger from the Actions tab
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      WP_BASE_URL:    http://localhost:8080
+      WP_ADMIN_USER:  admin
+      WP_ADMIN_PASS:  admin
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────────────
+      - name: Checkout e2e repository
+        uses: actions/checkout@v4
+
+      # ── Checkout plugin (free) ───────────────────────────────────────────────
+      # In CI the plugin repo is checked out alongside the test repo.
+      # Adjust `repository` / `path` to match your actual repo names.
+      - name: Checkout SchedulePress (free)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/wp-scheduled-posts
+          path: wp-scheduled-posts
+          # Use a PAT if the plugin repo is private:
+          # token: ${{ secrets.PLUGIN_REPO_TOKEN }}
+        continue-on-error: true  # Won't fail if repo is inaccessible in forks
+
+      # ── (Optional) Checkout pro plugin ──────────────────────────────────────
+      # - name: Checkout SchedulePress PRO
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: ${{ github.repository_owner }}/wp-scheduled-posts-pro
+      #     path: wp-scheduled-posts-pro
+      #     token: ${{ secrets.PLUGIN_REPO_TOKEN }}
+      #   continue-on-error: true
+
+      # ── Node.js ─────────────────────────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Install Playwright browsers ─────────────────────────────────────────
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # ── Make scripts executable ─────────────────────────────────────────────
+      - name: Make helper scripts executable
+        run: chmod +x docker/wp-setup.sh docker/wait-for-wp.sh
+
+      # ── Start Docker stack ──────────────────────────────────────────────────
+      - name: Start Docker Compose stack
+        run: |
+          docker compose up -d db wordpress
+          echo "Docker containers started."
+
+      # ── Wait for WordPress HTTP readiness ───────────────────────────────────
+      - name: Wait for WordPress to be ready
+        run: bash docker/wait-for-wp.sh http://localhost:8080 60
+
+      # ── Run WP-CLI setup (install WP + activate plugins) ────────────────────
+      - name: Run WordPress setup via WP-CLI
+        run: |
+          docker compose run --rm wpcli
+          echo "WordPress setup complete."
+
+      # ── Final readiness check after setup ───────────────────────────────────
+      - name: Final WordPress readiness check
+        run: |
+          for i in $(seq 1 12); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/wp-login.php)
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ WordPress ready (HTTP 200)"; exit 0
+            fi
+            echo "Attempt $i: HTTP $STATUS — waiting 5s..."
+            sleep 5
+          done
+          echo "❌ WordPress not ready after 60s"
+          docker compose logs wordpress
+          exit 1
+
+      # ── Run Playwright tests ────────────────────────────────────────────────
+      - name: Run Playwright E2E tests
+        run: npx playwright test --reporter=github,html
+        env:
+          WP_BASE_URL:   http://localhost:8080
+          WP_ADMIN_USER: admin
+          WP_ADMIN_PASS: admin
+          CI: "true"
+
+      # ── Upload test artifacts ───────────────────────────────────────────────
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ github.run_number }}
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload test result artifacts (traces, screenshots, videos)
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results-${{ github.run_number }}
+          path: test-results/
+          retention-days: 7
+
+      # ── Docker logs on failure ──────────────────────────────────────────────
+      - name: Dump Docker logs on failure
+        if: failure()
+        run: |
+          echo "=== WordPress container logs ==="
+          docker compose logs wordpress
+          echo "=== MySQL container logs ==="
+          docker compose logs db
+
+      # ── Teardown ────────────────────────────────────────────────────────────
+      - name: Stop Docker Compose stack
+        if: always()
+        run: docker compose down -v

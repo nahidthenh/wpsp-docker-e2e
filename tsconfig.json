@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@utils/*": ["utils/*"],
+      "@fixtures/*": ["fixtures/*"]
+    }
+  },
+  "include": [
+    "tests/**/*.ts",
+    "utils/**/*.ts",
+    "fixtures/**/*.ts",
+    "global-setup.ts",
+    "global-teardown.ts",
+    "playwright.config.ts"
+  ],
+  "exclude": ["node_modules", "dist", "playwright-report", "test-results"]
+}

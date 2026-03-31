@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+
+# Playwright
+playwright-report/
+test-results/
+playwright/.auth/
+
+# macOS
+.DS_Store

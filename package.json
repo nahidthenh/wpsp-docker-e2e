@@ -1,0 +1,27 @@
+{
+  "name": "wpsp-e2e-tests",
+  "version": "1.0.0",
+  "description": "Production-ready Playwright E2E tests for SchedulePress WordPress plugin",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:parallel": "playwright test --workers=4",
+    "test:ci": "playwright test --reporter=github,html",
+    "wp:setup": "docker-compose run --rm wpcli",
+    "docker:up": "docker-compose up -d && bash docker/wait-for-wp.sh",
+    "docker:down": "docker-compose down",
+    "docker:reset": "docker-compose down -v && docker-compose up -d && bash docker/wait-for-wp.sh",
+    "cron:run": "docker-compose exec -T wpcli wp cron event run --due-now --path=/var/www/html --allow-root",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "@types/node": "^20.12.0",
+    "typescript": "^5.4.5",
+    "dotenv": "^16.4.5"
+  }
+}

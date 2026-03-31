@@ -1,0 +1,86 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: wpsp_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    networks:
+      - wpsp_network
+
+  wordpress:
+    image: wordpress:6.5-php8.2-apache
+    container_name: wpsp_wordpress
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_TABLE_PREFIX: wp_
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - wp_data:/var/www/html
+      # Mount free plugin — adjust host path if your folder name differs
+      - ${PLUGIN_FREE_PATH:-../wp-scheduled-posts}:/var/www/html/wp-content/plugins/wp-scheduled-posts:ro
+      # Mount pro plugin if available (comment out if you don't have it)
+      - ${PLUGIN_PRO_PATH:-../wp-scheduled-posts-pro}:/var/www/html/wp-content/plugins/wp-scheduled-posts-pro:ro
+      - ./docker/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+    networks:
+      - wpsp_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/wp-login.php"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
+
+  wpcli:
+    image: wordpress:cli-php8.2
+    container_name: wpsp_wpcli
+    depends_on:
+      db:
+        condition: service_healthy
+      wordpress:
+        condition: service_started
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wp_data:/var/www/html
+      - ${PLUGIN_FREE_PATH:-../wp-scheduled-posts}:/var/www/html/wp-content/plugins/wp-scheduled-posts:ro
+      - ${PLUGIN_PRO_PATH:-../wp-scheduled-posts-pro}:/var/www/html/wp-content/plugins/wp-scheduled-posts-pro:ro
+      - ./docker/wp-setup.sh:/wp-setup.sh:ro
+    user: "33:33"
+    entrypoint: /bin/bash
+    command: /wp-setup.sh
+    networks:
+      - wpsp_network
+
+volumes:
+  db_data:
+  wp_data:
+
+networks:
+  wpsp_network:
+    driver: bridge
