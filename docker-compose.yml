@@ -40,9 +40,9 @@ services:
     volumes:
       - wp_data:/var/www/html
       # Mount free plugin — adjust host path if your folder name differs
-      - ${PLUGIN_FREE_PATH:-../wp-scheduled-posts}:/var/www/html/wp-content/plugins/wp-scheduled-posts:ro
+      - ${PLUGIN_FREE_PATH:-../wpsp/wp-scheduled-posts}:/var/www/html/wp-content/plugins/wp-scheduled-posts:ro
       # Mount pro plugin if available (comment out if you don't have it)
-      - ${PLUGIN_PRO_PATH:-../wp-scheduled-posts-pro}:/var/www/html/wp-content/plugins/wp-scheduled-posts-pro:ro
+      - ${PLUGIN_PRO_PATH:-../wpsp/wp-scheduled-posts-pro}:/var/www/html/wp-content/plugins/wp-scheduled-posts-pro:ro
       - ./docker/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
     networks:
       - wpsp_network
