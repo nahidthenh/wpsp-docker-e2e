@@ -5,7 +5,10 @@
       "Bash(ls /Users/md.nahidhasan/wpsp-docker-e2e/tests/*.spec.ts)",
       "Bash(xargs -I{} cat {})",
       "Bash(npx playwright:*)",
-      "Bash(grep -E \"\\\\.php$\")"
+      "Bash(grep -E \"\\\\.php$\")",
+      "Bash(curl -s -c /tmp/wp_c.txt -b wordpress_test_cookie=WP+Cookie+check -d 'log=admin&pwd=admin&wp-submit=Log+In&testcookie=1' -L http://localhost:8080/wp-login.php -o /dev/null)",
+      "Bash(curl -s -b /tmp/wp_c.txt 'http://localhost:8080/wp-admin/admin.php?page=schedulepress' -o /tmp/sp_settings.html)",
+      "Read(//tmp/**)"
     ]
   }
 }

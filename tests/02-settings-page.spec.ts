@@ -41,7 +41,7 @@ test.describe("SchedulePress Settings Page", () => {
   // ── Free-plugin tabs (registered in free plugin Menu.php) ───────────────
 
   test("Social Profiles tab is visible", async ({ adminPage }) => {
-    const tab = adminPage.locator("a, button, li, span").filter({ hasText: /^Social Profiles$/i }).first();
+    const tab = adminPage.locator("a, button, li, span").filter({ hasText: /^Social Profile$/i }).first();
     await expect(tab).toBeVisible({ timeout: 15_000 });
   });
 
@@ -55,25 +55,52 @@ test.describe("SchedulePress Settings Page", () => {
     await expect(tab).toBeVisible({ timeout: 15_000 });
   });
 
-  test("Auto Scheduler tab is visible", async ({ adminPage }) => {
-    const tab = adminPage.locator("a, button, li, span").filter({ hasText: /Auto.?Scheduler/i }).first();
-    await expect(tab).toBeVisible({ timeout: 15_000 });
+  // ── Scheduling Hub and its nested tabs ──────────────────────────────────
+  // Auto Scheduler and Manual Scheduler live INSIDE the "Scheduling Hub" tab.
+  // We must click the Hub first to expand it before the sub-content appears.
+
+  test("Scheduling Hub tab is visible in sidebar", async ({ adminPage }) => {
+    const hub = adminPage.locator("a, button, li, span").filter({ hasText: /^Scheduling Hub$/i }).first();
+    await expect(hub).toBeVisible({ timeout: 15_000 });
   });
 
-  test("Manual Scheduler tab is visible", async ({ adminPage }) => {
-    const tab = adminPage.locator("a, button, li, span").filter({ hasText: /Manual.?Scheduler/i }).first();
-    await expect(tab).toBeVisible({ timeout: 15_000 });
+  test("Auto Scheduler content is visible after opening Scheduling Hub", async ({ adminPage }) => {
+    // Open Scheduling Hub
+    const hub = adminPage.locator("a, button, li, span").filter({ hasText: /^Scheduling Hub$/i }).first();
+    await expect(hub).toBeVisible({ timeout: 15_000 });
+    await hub.click();
+
+    // Auto Scheduler section/toggle should appear in the panel
+    const autoTab = adminPage.locator("a, button, li, span, h2, h3, label").filter({ hasText: /Auto.?Sched/i }).first();
+    await expect(autoTab).toBeVisible({ timeout: 15_000 });
+  });
+
+  test("Manual Scheduler content is visible after opening Scheduling Hub", async ({ adminPage }) => {
+    // Open Scheduling Hub
+    const hub = adminPage.locator("a, button, li, span").filter({ hasText: /^Scheduling Hub$/i }).first();
+    await expect(hub).toBeVisible({ timeout: 15_000 });
+    await hub.click();
+
+    // Manual Scheduler section/toggle should appear in the panel
+    const manualTab = adminPage.locator("a, button, li, span, h2, h3, label").filter({ hasText: /Manual.?Sched/i }).first();
+    await expect(manualTab).toBeVisible({ timeout: 15_000 });
   });
 
   // ── PRO-only tabs ────────────────────────────────────────────────────────
 
-  test("License tab is visible (PRO)", async ({ adminPage }) => {
-    const tab = adminPage.locator("a, button, li, span").filter({ hasText: /^License$/i }).first();
+  test("Manage Schedule tab is visible after opening Scheduling Hub (PRO)", async ({ adminPage }) => {
+    // "Manage Schedule" is the default active sub-tab inside Scheduling Hub
+    const hub = adminPage.locator("a, button, li, span").filter({ hasText: /^Scheduling Hub$/i }).first();
+    await expect(hub).toBeVisible({ timeout: 15_000 });
+    await hub.click();
+
+    const tab = adminPage.locator("a, button, li, span, h2, h3").filter({ hasText: /Manage.?Schedule/i }).first();
     await expect(tab).toBeVisible({ timeout: 15_000 });
   });
 
-  test("Manage Schedule tab is visible (PRO)", async ({ adminPage }) => {
-    const tab = adminPage.locator("a, button, li, span").filter({ hasText: /Manage.?Schedule/i }).first();
+  test("License tab is visible in sidebar (PRO)", async ({ adminPage }) => {
+    // License is a top-level PRO sidebar tab — directly visible without clicking Hub
+    const tab = adminPage.locator("a, button, li, span").filter({ hasText: /^License$/i }).first();
     await expect(tab).toBeVisible({ timeout: 15_000 });
   });
 
