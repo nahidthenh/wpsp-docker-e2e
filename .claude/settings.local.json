@@ -8,7 +8,9 @@
       "Bash(grep -E \"\\\\.php$\")",
       "Bash(curl -s -c /tmp/wp_c.txt -b wordpress_test_cookie=WP+Cookie+check -d 'log=admin&pwd=admin&wp-submit=Log+In&testcookie=1' -L http://localhost:8080/wp-login.php -o /dev/null)",
       "Bash(curl -s -b /tmp/wp_c.txt 'http://localhost:8080/wp-admin/admin.php?page=schedulepress' -o /tmp/sp_settings.html)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(curl -s -b /tmp/wp_c.txt 'http://localhost:8080/wp-admin/admin.php?page=schedulepress-calendar' -o /tmp/sp_calendar.html)",
+      "Bash(curl -s \"http://localhost:8080/wp-content/plugins/wp-scheduled-posts/includes/Admin/Settings/assets/js/admin.js?ver=1fd1b627287c07fea189\")"
     ]
   }
 }

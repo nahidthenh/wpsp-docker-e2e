@@ -3,15 +3,18 @@
  *
  * Verifies the SchedulePress Calendar page (admin.php?page=schedulepress-calendar).
  *
- * The calendar is built with FullCalendar v6 (@fullcalendar/react 6.1.8).
- * Key DOM landmarks verified against the plugin source:
- *   .fc                  — FullCalendar root
- *   .fc-toolbar          — Toolbar (prev / title / next / today)
- *   .fc-toolbar-title    — "March 2026" style heading
- *   button.fc-prev-button
- *   button.fc-next-button
- *   button.fc-today-button
- *   .fc-event            — Individual calendar events
+ * DOM reality (confirmed by live inspection):
+ *  - SchedulePress sets FullCalendar's headerToolbar to display:none
+ *  - It renders its OWN navigation toolbar inside .wpsp-calender-content > .toolbar
+ *  - The custom toolbar structure (verified from DOM):
+ *      .toolbar
+ *        .left   → post-type filter (checkbox-select)
+ *        .middle → .calender-selected-month  ("April 2026" + dropdown)
+ *        .right  → button.wpsp-prev-button | button.wpsp-next-button | button.today-btn
+ *
+ * FullCalendar selectors that ARE visible: .fc, .fc-daygrid, .fc-event
+ * FullCalendar selectors that are HIDDEN:  .fc-header-toolbar, .fc-toolbar-title,
+ *                                           button.fc-prev-button, button.fc-today-button
  */
 
 import { test, expect } from "../fixtures/base-fixture";
@@ -20,8 +23,12 @@ import { SCHEDULE_PRESS } from "../utils/selectors";
 test.describe("SchedulePress Calendar", () => {
 
   test.beforeEach(async ({ adminPage }) => {
-    // Navigate directly — sidebar link is in a collapsed sub-menu and unreliable to click
     await adminPage.goto(SCHEDULE_PRESS.urls.calendar, { waitUntil: "domcontentloaded" });
+    // Wait for the FullCalendar root and the custom toolbar to both be ready
+    await adminPage.locator(SCHEDULE_PRESS.calendar.root).first()
+      .waitFor({ state: "visible", timeout: 20_000 });
+    await adminPage.locator(SCHEDULE_PRESS.calendar.title).first()
+      .waitFor({ state: "visible", timeout: 20_000 });
   });
 
   // ── Page-level checks ────────────────────────────────────────────────────
@@ -46,54 +53,53 @@ test.describe("SchedulePress Calendar", () => {
   // ── FullCalendar rendering ───────────────────────────────────────────────
 
   test("FullCalendar root (.fc) renders", async ({ adminPage }) => {
-    const fc = adminPage.locator(SCHEDULE_PRESS.calendar.root).first();
-    await expect(fc).toBeVisible({ timeout: 20_000 });
+    await expect(adminPage.locator(SCHEDULE_PRESS.calendar.root).first()).toBeVisible();
   });
 
-  test("calendar toolbar is visible", async ({ adminPage }) => {
-    const toolbar = adminPage.locator(SCHEDULE_PRESS.calendar.toolbar).first();
-    await expect(toolbar).toBeVisible({ timeout: 20_000 });
+  test("calendar day-grid cells are rendered", async ({ adminPage }) => {
+    await expect(adminPage.locator(SCHEDULE_PRESS.calendar.dayGrid).first()).toBeVisible();
   });
 
-  test("calendar title shows a 4-digit year", async ({ adminPage }) => {
+  // ── Custom SchedulePress toolbar ─────────────────────────────────────────
+  // NOTE: FullCalendar's .fc-header-toolbar is display:none — WPSP replaces it
+
+  test("custom toolbar is visible", async ({ adminPage }) => {
+    const toolbar = adminPage.locator(".wpsp-calender-content .toolbar").first();
+    await expect(toolbar).toBeVisible();
+  });
+
+  test("month/year title shows a 4-digit year", async ({ adminPage }) => {
     const title = adminPage.locator(SCHEDULE_PRESS.calendar.title).first();
-    await expect(title).toBeVisible({ timeout: 20_000 });
+    await expect(title).toBeVisible();
     const text = await title.textContent() ?? "";
     expect(text).toMatch(/\d{4}/);
   });
 
   test("prev-month button is visible and enabled", async ({ adminPage }) => {
     const btn = adminPage.locator(SCHEDULE_PRESS.calendar.prevBtn).first();
-    await expect(btn).toBeVisible({ timeout: 20_000 });
+    await expect(btn).toBeVisible();
     await expect(btn).toBeEnabled();
   });
 
   test("next-month button is visible and enabled", async ({ adminPage }) => {
     const btn = adminPage.locator(SCHEDULE_PRESS.calendar.nextBtn).first();
-    await expect(btn).toBeVisible({ timeout: 20_000 });
+    await expect(btn).toBeVisible();
     await expect(btn).toBeEnabled();
   });
 
   test("today button is visible", async ({ adminPage }) => {
     const btn = adminPage.locator(SCHEDULE_PRESS.calendar.todayBtn).first();
-    await expect(btn).toBeVisible({ timeout: 20_000 });
-  });
-
-  test("day-grid cells are rendered (days of the month)", async ({ adminPage }) => {
-    const dayGrid = adminPage.locator(SCHEDULE_PRESS.calendar.dayGrid).first();
-    await expect(dayGrid).toBeVisible({ timeout: 20_000 });
+    await expect(btn).toBeVisible();
   });
 
   // ── Navigation ───────────────────────────────────────────────────────────
 
-  test("clicking next-month changes the calendar title", async ({ adminPage }) => {
-    const title  = adminPage.locator(SCHEDULE_PRESS.calendar.title).first();
-    await expect(title).toBeVisible({ timeout: 20_000 });
-
+  test("clicking next-month changes the month/year title", async ({ adminPage }) => {
+    const title = adminPage.locator(SCHEDULE_PRESS.calendar.title).first();
     const before = await title.textContent();
 
     await adminPage.locator(SCHEDULE_PRESS.calendar.nextBtn).first().click();
-    await adminPage.waitForTimeout(600); // allow React re-render
+    await adminPage.waitForTimeout(600);
 
     const after = await title.textContent();
     expect(after).not.toBe(before);
@@ -101,26 +107,21 @@ test.describe("SchedulePress Calendar", () => {
 
   test("clicking prev-month after next restores original title", async ({ adminPage }) => {
     const title = adminPage.locator(SCHEDULE_PRESS.calendar.title).first();
-    await expect(title).toBeVisible({ timeout: 20_000 });
-
     const original = await title.textContent();
 
     await adminPage.locator(SCHEDULE_PRESS.calendar.nextBtn).first().click();
     await adminPage.waitForTimeout(600);
-
     await adminPage.locator(SCHEDULE_PRESS.calendar.prevBtn).first().click();
     await adminPage.waitForTimeout(600);
 
-    const restored = await title.textContent();
-    expect(restored).toBe(original);
+    expect(await title.textContent()).toBe(original);
   });
 
-  test("clicking today button keeps current month visible", async ({ adminPage }) => {
+  test("clicking today button restores current month", async ({ adminPage }) => {
     const title = adminPage.locator(SCHEDULE_PRESS.calendar.title).first();
-    await expect(title).toBeVisible({ timeout: 20_000 });
     const original = await title.textContent();
 
-    // Go forward 2 months, then hit Today
+    // Navigate away 2 months then back
     await adminPage.locator(SCHEDULE_PRESS.calendar.nextBtn).first().click();
     await adminPage.waitForTimeout(400);
     await adminPage.locator(SCHEDULE_PRESS.calendar.nextBtn).first().click();
@@ -128,7 +129,6 @@ test.describe("SchedulePress Calendar", () => {
     await adminPage.locator(SCHEDULE_PRESS.calendar.todayBtn).first().click();
     await adminPage.waitForTimeout(600);
 
-    const backToToday = await title.textContent();
-    expect(backToToday).toBe(original);
+    expect(await title.textContent()).toBe(original);
   });
 });

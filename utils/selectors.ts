@@ -80,16 +80,22 @@ export const SCHEDULE_PRESS = {
     manageSchedule: "text=Manage Schedule",
   },
 
-  // Calendar view — FullCalendar v6 selectors
+  // Calendar view
+  // SchedulePress hides the native FullCalendar toolbar (display:none) and renders
+  // its own navigation UI inside .wpsp-calender-content > .toolbar
+  // Verified selectors from live DOM inspection:
   calendar: {
-    root:     ".fc",
-    toolbar:  ".fc-toolbar, .fc-header-toolbar",
-    title:    ".fc-toolbar-title",
-    prevBtn:  "button.fc-prev-button",
-    nextBtn:  "button.fc-next-button",
-    todayBtn: "button.fc-today-button",
-    event:    ".fc-event",
-    dayGrid:  ".fc-daygrid",
+    root:     ".fc",                         // FullCalendar root — IS visible
+    dayGrid:  ".fc-daygrid",                 // Calendar grid — IS visible
+
+    // SchedulePress custom toolbar (fc-header-toolbar is display:none)
+    toolbar:  ".wpsp-calender-content .toolbar, .wpsp-calender-header",
+    title:    ".calender-selected-month",    // "April 2026" — note typo 'calender'
+    prevBtn:  "button.wpsp-prev-button",     // ← PREV
+    nextBtn:  "button.wpsp-next-button",     // → NEXT
+    todayBtn: "button.today-btn",            // Today
+
+    event:    ".fc-event",                   // Individual calendar events
   },
 
   // Posts list
