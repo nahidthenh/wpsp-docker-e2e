@@ -16,13 +16,13 @@
 
 import { test, expect } from "../fixtures/base-fixture";
 import { SCHEDULE_PRESS } from "../utils/selectors";
+import { runWpCli } from "../utils/wp-helpers";
 
-const BASE_URL   = process.env.WP_BASE_URL   ?? "http://localhost:8080";
-const ADMIN_USER = process.env.WP_ADMIN_USER ?? "admin";
-const ADMIN_PASS = process.env.WP_ADMIN_PASS ?? "admin";
+const BASE_URL = process.env.WP_BASE_URL ?? "http://localhost:8080";
 
-function basicAuth(u: string, p: string) {
-  return "Basic " + Buffer.from(`${u}:${p}`).toString("base64");
+/** Build a REST API URL using plain-permalink format (works without pretty permalinks). */
+function restUrl(route: string): string {
+  return `${BASE_URL}/?rest_route=${route}`;
 }
 
 // ── Settings page — PRO tabs ─────────────────────────────────────────────────
@@ -39,7 +39,12 @@ test.describe("SchedulePress PRO – Settings Tabs", () => {
   });
 
   test("Manage Schedule tab is present in Settings (PRO)", async ({ adminPage }) => {
-    const tab = adminPage.locator("a, button, li, span")
+    // "Manage Schedule" is a nested item inside "Scheduling Hub" — open the Hub first
+    const hub = adminPage.locator("a, button, li, span")
+      .filter({ hasText: /^Scheduling Hub$/i }).first();
+    await expect(hub).toBeVisible({ timeout: 15_000 });
+    await hub.click();
+    const tab = adminPage.locator("a, button, li, span, h2, h3")
       .filter({ hasText: /Manage.?Schedule/i }).first();
     await expect(tab).toBeVisible({ timeout: 15_000 });
   });
@@ -61,9 +66,9 @@ test.describe("SchedulePress PRO – Settings Tabs", () => {
 test.describe("SchedulePress PRO – Advanced Scheduling Meta Fields", () => {
   let postId: number;
 
-  test.beforeAll(({ wpCli }) => {
-    // Create a published post to work with
-    const raw = wpCli(
+  test.beforeAll(() => {
+    // runWpCli is used directly — Playwright fixtures are not available in beforeAll
+    const raw = runWpCli(
       `post create` +
       ` --post_title="E2E PRO Meta Test – ${Date.now()}"` +
       ` --post_status=publish` +
@@ -73,19 +78,39 @@ test.describe("SchedulePress PRO – Advanced Scheduling Meta Fields", () => {
     expect(postId).toBeGreaterThan(0);
   });
 
-  test.afterAll(({ wpCli }) => {
-    if (postId) wpCli(`post delete ${postId} --force`);
+  test.afterAll(() => {
+    if (postId) runWpCli(`post delete ${postId} --force`);
   });
 
-  test("PRO advanced-schedule meta field is accessible via REST API", async ({ request }) => {
-    const res = await request.get(
-      `${BASE_URL}/wp-json/wp/v2/posts/${postId}?context=edit`,
-      { headers: { Authorization: basicAuth(ADMIN_USER, ADMIN_PASS) } }
+  test("PRO advanced-schedule meta field is accessible via REST API", async ({ adminPage }) => {
+    // Use the authenticated page session + WP nonce — Basic Auth is disabled by default
+    const nonce = await adminPage.evaluate(async () => {
+      const r = await fetch("/wp-admin/admin-ajax.php?action=rest-nonce");
+      return r.text();
+    });
+
+    // postId may be 0 if beforeAll ran in a different worker scope; fall back to latest post
+    const idToUse = postId > 0 ? postId : await adminPage.evaluate(
+      async ({ url, n }: { url: string; n: string }) => {
+        const r = await fetch(url, { headers: { "X-WP-Nonce": n } });
+        const posts = await r.json() as Array<{ id: number }>;
+        return posts[0]?.id ?? 0;
+      },
+      { url: restUrl("/wp/v2/posts") + "&status=publish&per_page=1&context=edit", n: nonce }
     );
-    expect(res.status()).toBe(200);
-    const body = await res.json();
+    expect(idToUse).toBeGreaterThan(0);
+
+    const res = await adminPage.evaluate(
+      async ({ url, n }: { url: string; n: string }) => {
+        const r = await fetch(url, { headers: { "X-WP-Nonce": n } });
+        const body = await r.json() as { meta?: unknown };
+        return { status: r.status, hasMeta: "meta" in body };
+      },
+      { url: restUrl(`/wp/v2/posts/${idToUse}`) + "&context=edit", n: nonce }
+    );
+    expect(res.status).toBe(200);
     // PRO registers _wpscppro_advance_schedule as a REST-exposed meta field
-    expect(body).toHaveProperty("meta");
+    expect(res.hasMeta).toBe(true);
   });
 
   test("PRO unpublish date meta field can be set via WP-CLI", ({ wpCli }) => {
@@ -169,8 +194,8 @@ test.describe("SchedulePress PRO – Missed Schedule Handler", () => {
 test.describe("SchedulePress PRO – Social Share Meta", () => {
   let postId: number;
 
-  test.beforeAll(({ wpCli }) => {
-    const raw = wpCli(
+  test.beforeAll(() => {
+    const raw = runWpCli(
       `post create` +
       ` --post_title="E2E Social Meta – ${Date.now()}"` +
       ` --post_status=draft` +
@@ -179,8 +204,8 @@ test.describe("SchedulePress PRO – Social Share Meta", () => {
     postId = parseInt(raw.trim(), 10);
   });
 
-  test.afterAll(({ wpCli }) => {
-    if (postId) wpCli(`post delete ${postId} --force`);
+  test.afterAll(() => {
+    if (postId) runWpCli(`post delete ${postId} --force`);
   });
 
   test("social-skip meta field can be set via WP-CLI", ({ wpCli }) => {

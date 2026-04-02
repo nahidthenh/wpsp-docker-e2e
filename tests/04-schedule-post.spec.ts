@@ -15,9 +15,12 @@
 import { test, expect } from "../fixtures/base-fixture";
 import { SCHEDULE_PRESS } from "../utils/selectors";
 
-const BASE_URL    = process.env.WP_BASE_URL    ?? "http://localhost:8080";
-const ADMIN_USER  = process.env.WP_ADMIN_USER  ?? "admin";
-const ADMIN_PASS  = process.env.WP_ADMIN_PASS  ?? "admin";
+const BASE_URL = process.env.WP_BASE_URL ?? "http://localhost:8080";
+
+/** Build REST URL using plain-permalink format (works even without pretty permalinks). */
+function restUrl(route: string): string {
+  return `${BASE_URL}/?rest_route=${route}`;
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -25,11 +28,6 @@ const ADMIN_PASS  = process.env.WP_ADMIN_PASS  ?? "admin";
 function futureGmt(offsetHours = 2): string {
   const d = new Date(Date.now() + offsetHours * 60 * 60 * 1000);
   return d.toISOString().slice(0, 19).replace("T", " ");
-}
-
-/** Base64-encode credentials for HTTP Basic Auth. */
-function basicAuth(user: string, pass: string) {
-  return "Basic " + Buffer.from(`${user}:${pass}`).toString("base64");
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -99,20 +97,28 @@ test.describe("Schedule a Post", () => {
 
   // ── REST API verification ─────────────────────────────────────────────
 
-  test("REST API returns status 'future' for authenticated request", async ({ request }) => {
-    const res = await request.get(
-      `${BASE_URL}/wp-json/wp/v2/posts/${postId}?context=edit`,
-      { headers: { Authorization: basicAuth(ADMIN_USER, ADMIN_PASS) } }
+  test("REST API returns status 'future' for authenticated request", async ({ adminPage }) => {
+    // Use the authenticated page session to fetch a REST nonce, then call the API
+    const nonce = await adminPage.evaluate(async () => {
+      const r = await fetch("/wp-admin/admin-ajax.php?action=rest-nonce");
+      return r.text();
+    });
+    const res = await adminPage.evaluate(
+      async ({ url, n }: { url: string; n: string }) => {
+        const r = await fetch(url, { headers: { "X-WP-Nonce": n } });
+        const body = await r.json() as { status: string; id: number };
+        return { status: r.status, body };
+      },
+      { url: restUrl(`/wp/v2/posts/${postId}`) + "&context=edit", n: nonce }
     );
-    expect(res.status()).toBe(200);
-    const body = await res.json();
-    expect(body.status).toBe("future");
-    expect(body.id).toBe(postId);
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("future");
+    expect(res.body.id).toBe(postId);
   });
 
   test("REST API — scheduled post is NOT publicly accessible before publish", async ({ request }) => {
     // Public (unauthenticated) request must NOT expose the unpublished post
-    const res = await request.get(`${BASE_URL}/wp-json/wp/v2/posts/${postId}`);
+    const res = await request.get(restUrl(`/wp/v2/posts/${postId}`));
     expect([401, 403, 404]).toContain(res.status());
   });
 
