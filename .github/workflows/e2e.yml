@@ -1,10 +1,6 @@
 name: SchedulePress E2E Tests
 
 on:
-  push:
-    branches: [main, master, develop]
-  pull_request:
-    branches: [main, master, develop]
   # Allow manual trigger from the Actions tab
   workflow_dispatch:
 
