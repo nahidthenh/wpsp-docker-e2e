@@ -240,6 +240,133 @@ test.describe("SchedulePress Settings – General Tab", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Social Profile Tab
+// Selector: li.wprf-tab-nav-item[data-key="layout_social_profile"]
+//
+// DOM structure (confirmed by live inspection):
+//   .wprf-tab-content.wprf-tab-layout_social_profile.wprf-active
+//     .wprf-section-title            → "Social Profile"
+//     .wprf-control.wprf-social-profile.wprf-{platform}_profile_list-social-profile  (×8)
+//       .social-profile-card
+//         .main-profile              → platform name + description text
+//         .social-media-type-select  → React-Select (Facebook / LinkedIn only)
+//         button.wpscp-social-tab__btn--addnew-profile  → "Add New"
+//
+// Platforms (8): facebook, twitter, linkedin, pinterest,
+//                instagram, medium, threads, google_business_profile
+// ─────────────────────────────────────────────────────────────────────────────
+
+test.describe("SchedulePress Settings – Social Profile Tab", () => {
+  const NAV_SELECTOR   = 'li.wprf-tab-nav-item[data-key="layout_social_profile"]';
+  const PANEL_SELECTOR = ".wprf-tab-layout_social_profile";
+
+  /** Selector for an individual platform's wrapper div. */
+  const platformWrapper = (slug: string) =>
+    `.wprf-${slug}_profile_list-social-profile`;
+
+  const platforms = [
+    { slug: "facebook",               label: "Facebook"              },
+    { slug: "twitter",                label: "Twitter"               },
+    { slug: "linkedin",               label: "LinkedIn"              },
+    { slug: "pinterest",              label: "Pinterest"             },
+    { slug: "instagram",              label: "Instagram"             },
+    { slug: "medium",                 label: "Medium"                },
+    { slug: "threads",                label: "Threads"               },
+    { slug: "google_business",         label: "Google Business Profile"},
+  ];
+
+  test.beforeEach(async ({ adminPage }) => {
+    await adminPage.goto(SCHEDULE_PRESS.urls.settings, { waitUntil: "domcontentloaded" });
+    await adminPage.locator(NAV_SELECTOR).waitFor({ state: "visible", timeout: 10_000 });
+    await adminPage.locator(NAV_SELECTOR).click();
+    await adminPage.waitForTimeout(600);
+  });
+
+  // ── Tab navigation ─────────────────────────────────────────────────────
+
+  test("Social Profile tab nav item is visible and clickable", async ({ adminPage }) => {
+    await expect(adminPage.locator(NAV_SELECTOR)).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("Social Profile panel becomes active after clicking tab", async ({ adminPage }) => {
+    await expect(adminPage.locator(PANEL_SELECTOR)).toBeVisible({ timeout: 10_000 });
+  });
+
+  // ── Panel heading ──────────────────────────────────────────────────────
+
+  test("'Social Profile' section heading is visible", async ({ adminPage }) => {
+    const heading = adminPage.locator(".wprf-section-title")
+      .filter({ hasText: /^Social Profile$/i }).first();
+    await expect(heading).toBeVisible({ timeout: 10_000 });
+  });
+
+  // ── Platform card count ────────────────────────────────────────────────
+
+  test("panel contains exactly 8 platform cards", async ({ adminPage }) => {
+    const cards = adminPage.locator(`${PANEL_SELECTOR} .social-profile-card`);
+    await expect(cards.first()).toBeVisible({ timeout: 10_000 });
+    expect(await cards.count()).toBe(8);
+  });
+
+  // ── Per-platform card visibility ───────────────────────────────────────
+
+  for (const { slug, label } of platforms) {
+    test(`${label} platform card is rendered`, async ({ adminPage }) => {
+      const card = adminPage.locator(platformWrapper(slug)).locator(".social-profile-card");
+      await expect(card).toBeVisible({ timeout: 10_000 });
+    });
+  }
+
+  // ── Platform name text inside each card ───────────────────────────────
+
+  for (const { slug, label } of platforms) {
+    test(`${label} card shows platform name`, async ({ adminPage }) => {
+      const card = adminPage.locator(platformWrapper(slug));
+      await expect(card).toContainText(label, { timeout: 10_000 });
+    });
+  }
+
+  // ── "Add New" button per platform ─────────────────────────────────────
+
+  for (const { slug, label } of platforms) {
+    test(`${label} card has an 'Add New' button`, async ({ adminPage }) => {
+      // Most platforms use button.wpscp-social-tab__btn--addnew-profile;
+      // Google Business Profile renders a classless button — match by text instead.
+      const btn = adminPage
+        .locator(platformWrapper(slug))
+        .locator("button", { hasText: /^Add New$/i });
+      await expect(btn).toBeVisible({ timeout: 10_000 });
+      await expect(btn).toBeEnabled();
+    });
+  }
+
+  // ── Description text ──────────────────────────────────────────────────
+
+  for (const { slug, label } of platforms) {
+    test(`${label} card shows enable/disable description`, async ({ adminPage }) => {
+      const card = adminPage.locator(platformWrapper(slug));
+      await expect(card).toContainText(/You can enable\/disable/i, { timeout: 10_000 });
+    });
+  }
+
+  // ── React-Select type dropdown (Facebook & LinkedIn only) ──────────────
+
+  test("Facebook card has a profile-type select dropdown", async ({ adminPage }) => {
+    const select = adminPage
+      .locator(platformWrapper("facebook"))
+      .locator(".social-media-type-select__control");
+    await expect(select).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("LinkedIn card has a profile-type select dropdown", async ({ adminPage }) => {
+    const select = adminPage
+      .locator(platformWrapper("linkedin"))
+      .locator(".social-media-type-select__control");
+    await expect(select).toBeVisible({ timeout: 10_000 });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Email Notify Tab
 // Selector: li.wprf-tab-nav-item[data-key="layout_email_notify"]
 // Fields: Under Review, Rejected, Scheduled, Published notification toggles
