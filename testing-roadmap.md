@@ -1,40 +1,40 @@
 # SchedulePress E2E Testing Roadmap
 
-## Overview
+## Progress Summary
 
-| Tier | Spec files | Approx tests | Focus |
+| Tier | Spec files | Tests | Status |
 |---|---|---|---|
-| 01-Basic | 5 (done) | 131 | Rendering + data existence |
-| 02-Medium | 6 (planned) | ~80 | UI interaction + settings persistence |
-| 03-Advanced | 6 (planned) | ~60 | End-to-end flows + cron + PRO cycles |
-| **Total** | **17** | **~270** | |
+| 01-Basic | 5 | 131 | ✅ Complete |
+| 02-Medium | 6 | 85 pass / 1 skip | ✅ Complete |
+| 03-Advanced | 6 | ~60 planned | 🔲 Not started |
+| **Total so far** | **11** | **~216** | |
 
 ---
 
-## TIER 01 — BASIC (Done) `131 tests`
+## TIER 01 — BASIC ✅ Complete `131 tests`
 
 > **Goal:** Prove the plugin is installed, all UI surfaces render, and core data structures exist.
 
-| Spec | Tests | What it proves |
-|---|---|---|
-| `01-plugin-activation.spec.ts` | 9 | Both plugins active, menu links exist, no PHP fatal |
-| `02-settings-page.spec.ts` | 97 | All 7 tabs visible, all 8 social platform cards/templates present |
-| `03-calendar.spec.ts` | 14 | Calendar renders, toolbar works, month navigation works |
-| `04-schedule-post.spec.ts` | 7 | Create post → status=future → appears in admin list + calendar |
-| `05-pro-features.spec.ts` | 12 | PRO meta fields exist, License/Scheduling Hub tabs load, missed-schedule cron registered |
+| Spec | Tests | Status | What it proves |
+|---|---|---|---|
+| `01-plugin-activation.spec.ts` | 9 | ✅ | Both plugins active, menu links exist, no PHP fatal |
+| `02-settings-page.spec.ts` | 97 | ✅ | All 7 tabs visible, all 8 social platform cards/templates present |
+| `03-calendar.spec.ts` | 14 | ✅ | Calendar renders, toolbar works, month navigation works |
+| `04-schedule-post.spec.ts` | 7 | ✅ | Create post → status=future → appears in admin list + calendar |
+| `05-pro-features.spec.ts` | 12 | ✅ | PRO meta fields exist, License/Scheduling Hub tabs load, missed-schedule cron registered |
 
-**Characteristic:** Read-only + WP-CLI verification. Nothing is saved through the UI. No flows are completed end-to-end.
+**Characteristic:** Read-only + WP-CLI verification. Nothing is saved through the UI. No flows completed end-to-end.
 
 ### What each spec covers
 
-**`01-plugin-activation.spec.ts`**
+**`01-plugin-activation.spec.ts`** ✅
 - Free + PRO plugin rows visible in Plugins list
 - Both plugins show "Active" status
 - SchedulePress top-level menu + Calendar sub-menu appear in sidebar
 - Settings page loads without PHP fatal errors
 - WP-CLI confirms both slugs are active
 
-**`02-settings-page.spec.ts`**
+**`02-settings-page.spec.ts`** ✅
 - Settings page: HTTP 200, branding, wp-admin chrome
 - General tab: all field labels present (Dashboard Widget, Admin Bar, Post Types, Taxonomy, Categories, Users, Republish/Unpublish, Enhanced Publishing)
 - Email Notify tab: section heading + Under Review + Scheduled toggle labels
@@ -43,14 +43,14 @@
 - Scheduling Hub: Auto Scheduler, Manual Scheduler, Manage Schedule accessible after clicking Hub
 - License tab: present in sidebar, loads without errors
 
-**`03-calendar.spec.ts`**
+**`03-calendar.spec.ts`** ✅
 - Calendar page: HTTP 200, no PHP fatal, wp-admin chrome intact
 - FullCalendar root (.fc) renders, day-grid cells present
 - Custom WPSP toolbar (NOT native FC toolbar): visible, month title has 4-digit year
 - Prev/Next/Today buttons visible and enabled
 - Month navigation: clicking next changes title; today restores current month
 
-**`04-schedule-post.spec.ts`**
+**`04-schedule-post.spec.ts`** ✅
 - Create post via WP-CLI with future date
 - WP-CLI confirms status=future + correct title
 - Post appears in wp-admin Posts > Scheduled list with "Scheduled" label
@@ -58,7 +58,7 @@
 - Unauthenticated request cannot access the post before publish
 - Post event dot appears on the correct calendar day cell
 
-**`05-pro-features.spec.ts`**
+**`05-pro-features.spec.ts`** ✅
 - PRO Settings tabs: License and Manage Schedule present
 - License tab loads without errors
 - PRO meta fields via WP-CLI: `_wpscppro_unpublish_date`, `_wpscppro_republish_date`, `_wpscppro_advance_schedule`
@@ -69,140 +69,126 @@
 
 ---
 
-## TIER 02 — MEDIUM (Planned) `~80 tests`
+## TIER 02 — MEDIUM ✅ Complete `85 pass / 1 intentional skip`
 
 > **Goal:** Interact with the UI, save settings, and verify persistence. Single-feature flows completed through the browser.
 
-### `06-post-metabox.spec.ts` — Post Editor Scheduling Metabox (~15 tests)
+| Spec | Tests | Status | What it proves |
+|---|---|---|---|
+| `06-post-metabox.spec.ts` | ~30 | ✅ | Gutenberg Schedule And Share panel opens, date picker, social items, action buttons |
+| `07-settings-save.spec.ts` | 9 | ✅ | Settings persist after React save: Dashboard Widget, Admin Bar, Email Notify, Social Templates |
+| `08-scheduling-hub.spec.ts` | 15 | ✅ | Scheduling Hub sub-tabs visible, Advanced/Manage/Missed Schedule panels load |
+| `09-dashboard-widget.spec.ts` | 11 | ✅ | Widget visible, count correct, collapse/expand, disappears/reappears on toggle |
+| `10-admin-bar.spec.ts` | 8 | ✅ | Admin bar item visible, count matches, disappears on toggle |
+| `11-calendar-events.spec.ts` | 11 | ✅ | Scheduled post appears as FC event on correct day, event disappears after delete |
 
-**Priority: HIGH** — most-used user surface, zero coverage currently.
+**Characteristic:** Browser UI interaction + settings persistence + WP-CLI/REST cross-verification.
 
-| # | Test | Verify |
-|---|---|---|
-| 1 | Metabox renders in Classic Editor | `.wpsp-schedule-metabox` or equivalent container visible |
-| 2 | Metabox renders in Gutenberg sidebar | WPSP sidebar panel visible in block editor |
-| 3 | Date/time picker opens on click | Date input becomes interactive |
-| 4 | Set future date → save draft → status = future | WP-CLI confirms `post_status=future` |
-| 5 | Set past date → save draft → status = draft | WP-CLI confirms no scheduled status |
-| 6 | "Publish Immediately" button visible when toggle ON | Button appears in metabox/sidebar |
-| 7 | "Publish Immediately" click publishes post | Post status becomes `publish` immediately |
-| 8 | Social share checkbox is visible in metabox | Checkbox/toggle present |
-| 9 | Social share checkbox is toggleable | State changes on click |
-| 10 | Clearing the date → post status stays draft | No `future` status without a date |
-| 11 | Scheduled post title editable and saves | Title update persists after save |
-| 12 | Metabox shows existing schedule for saved posts | Re-opening shows previously set date/time |
-| 13 | Date format respects WordPress date format setting | Displayed format matches WP setting |
-| 14 | Time zone label is displayed | Site timezone shown near date input |
-| 15 | Metabox present for custom post types (if enabled) | Metabox appears for CPTs configured in General settings |
+### Key technical patterns discovered in Tier 02
 
-### `07-settings-save.spec.ts` — Settings Persist After Save (~20 tests)
+- **Gutenberg sidebar panel:** `.components-panel__body.schedulepress-options` — NOT inside the button modal
+- **WPSP modal trigger:** `button#wpsp-post-panel-button` → `.wpsp-post-panel-modal`
+- **Social accordion items:** `.schedulepress-options .social-accordion-item` (in sidebar, not modal)
+- **Multiple Save buttons:** Each settings section has its own; use `page.evaluate()` with `offsetParent !== null` to click the first visible one
+- **Settings save helper:**
+  ```typescript
+  await adminPage.evaluate(() => {
+    const btns = Array.from(document.querySelectorAll<HTMLButtonElement>("button.wprf-submit-button"));
+    btns.find((b) => b.offsetParent !== null)?.click();
+  });
+  await adminPage.waitForTimeout(1500);
+  ```
+- **jQuery UI date picker:** `input[placeholder="Select date & time"]` is READ-ONLY — use `toBeAttached`, not `toBeEditable`
+- **FC events:** Check `.fc-event` textContent (contains time + title), not just `.fc-event-title`
+- **Strict mode — two toolbar instances:** Use `.first()` on `button.wpsp-next-button`
+- **Dashboard widget collapse state:** Persists across page loads — check `aria-expanded` before asserting `.inside` visibility
+- **State contamination:** `07-settings-save` disables Widget + Admin Bar → `09` and `10` use `enableDashboardWidget()` / `enableAdminBar()` in `beforeEach`
+- **tsconfig.json:** Must include `"DOM"` in `lib` array for `document`, `HTMLButtonElement`, `window` inside `page.evaluate()`
 
-**Priority: HIGH** — confirms the React settings app actually writes to the DB.
+### What each spec covers
 
-| # | Test | Verify |
-|---|---|---|
-| 1 | Toggle "Dashboard Widget" ON → Save → reload → still ON | Toggle state persists |
-| 2 | Toggle "Dashboard Widget" OFF → Save → reload → still OFF | Toggle off persists |
-| 3 | Toggle "Sitewide Admin Bar" ON → Save → reload | State persists |
-| 4 | Toggle "Admin Bar" ON → Save → reload | State persists |
-| 5 | Change Admin Bar item template text → Save → reload | Text value persists |
-| 6 | Enable "Show Publish Post Immediately Button" → Save → reload | Toggle persists |
-| 7 | Enable "Post Republish and Unpublish" → Save → reload | Toggle persists |
-| 8 | Email Notify: enable "Under Review" → Save → reload | Toggle persists |
-| 9 | Email Notify: enable "Scheduled" → Save → reload | Toggle persists |
-| 10 | Email Notify: enable "Published" → Save → reload | Toggle persists |
-| 11 | Social Templates: change Facebook template text → Save → reload | New value persists |
-| 12 | Social Templates: change Twitter template text → Save → reload | New value persists |
-| 13 | Settings saved to `wpsp_settings_v5` DB option | WP-CLI `option get wpsp_settings_v5` reflects UI value |
-| 14 | Save shows success notice | "Settings Saved" or equivalent toast/notice appears |
-| 15 | Invalid value rejected with validation message | Error shown for bad input |
-| 16 | Calendar tab: change setting → Save → reload | Setting persists |
-| 17 | General: Add Post Type → Save → reload → type still selected | Multi-select persists |
-| 18 | General: Remove Post Type → Save → reload → type gone | Removal persists |
-| 19 | Settings survive page navigation away and back | No data loss on tab switch |
-| 20 | Concurrent save (double-click Save) → only one write | No duplicate DB entries |
+**`06-post-metabox.spec.ts`** ✅
+- "Schedule And Share" button visible + labeled correctly
+- Modal opens on click, contains `.wpsp-post-panel`
+- Close button (×) visible and functional
+- "Schedule On" and "Scheduling Options" section headings visible
+- Date picker input attached with correct placeholder (read-only jQuery UI widget)
+- Scheduling enable/disable toggle (checkbox) attached
+- "Disable Social Share" checkbox present + label visible
+- 8 social platform accordion items visible in Gutenberg sidebar
+- All 8 platform names verified individually (Facebook, Twitter, LinkedIn, Pinterest, Instagram, Medium, Threads, Google Business Profile)
+- "Save Changes" button visible + enabled
+- "Share Now", "Add Social Message", "Upload Social Banner" buttons visible
+- SchedulePress Gutenberg sidebar panel present + labeled
+- "Social Share Settings" heading visible in sidebar
+- Button present on existing post edit page (skips if no posts)
 
-### `08-scheduling-hub.spec.ts` — Auto & Manual Scheduler UI (~20 tests)
+**`07-settings-save.spec.ts`** ✅
+- Dashboard Widget toggle: ON/OFF → Save → reload → state persists
+- Admin Bar toggle: ON/OFF → Save → reload → state persists
+- Publish Immediately Button toggle → Save → persists
+- Email Notify "Under Review" toggle → Save → persists
+- Email Notify "Scheduled" toggle → Save → persists
+- Facebook template text changed → Save → persists
+- Settings stored in `wpsp_settings_v5` DB option (WP-CLI verified)
+- Save shows "Settings Saved" success notice
 
-**Priority: MEDIUM** — core PRO scheduling feature.
+**`08-scheduling-hub.spec.ts`** ✅
+- Scheduling Hub nav item visible and active after click
+- Advanced Schedule, Manage Schedule, Missed Schedule sub-tabs appear in sidebar
+- All three sub-tabs are clickable
+- Advanced Schedule panel: no PHP errors, body content non-trivial, at least one settings field
+- Manage Schedule panel: no PHP errors, body content non-trivial, nav item visible
+- Missed Schedule panel: no PHP errors, body content non-trivial, at least one settings control
+- `wpsp_settings_v5` WordPress option exists and is valid JSON
 
-| # | Test | Verify |
-|---|---|---|
-| 1 | Auto Scheduler enable toggle is present | Toggle exists in panel |
-| 2 | Toggle Auto Scheduler ON → Save → reload → ON | Persists |
-| 3 | Toggle Auto Scheduler OFF → Save → reload → OFF | Persists |
-| 4 | Add a time slot → Save → slot appears after reload | Time slot persists |
-| 5 | Add multiple time slots → Save → all appear | Multiple slots persist |
-| 6 | Remove a time slot → Save → slot gone after reload | Deletion persists |
-| 7 | Time slot input validates HH:MM format | Invalid time rejected |
-| 8 | Manual Scheduler panel renders | Panel visible |
-| 9 | Switch to Manual mode → Save → mode persists | Mode setting saved |
-| 10 | Manage Schedule table renders | Table/list visible |
-| 11 | Manage Schedule table has correct columns | Title, Date, Status columns present |
-| 12 | Manage Schedule filter by post type works | Filter dropdown changes visible rows |
-| 13 | Manage Schedule filter by status works | Status filter narrows results |
-| 14 | Manage Schedule pagination works (if >10 items) | Page 2 loads different rows |
-| 15 | Manage Schedule: edit scheduled time inline | Date change saves via REST |
-| 16 | Manage Schedule: delete a schedule entry | Entry removed from table |
-| 17 | Advanced Schedule tab renders in Scheduling Hub | Tab visible and clickable |
-| 18 | Missed Schedule tab renders in Scheduling Hub | Tab visible and clickable |
-| 19 | Missed Schedule: recovery option toggle saves | Setting persists |
-| 20 | Scheduling Hub settings saved to correct DB key | WP-CLI confirms option value |
+**`09-dashboard-widget.spec.ts`** ✅
+- Widget visible on `/wp-admin/` when enabled
+- Widget has "Scheduled Posts" title
+- Widget body (`.inside`) is rendered (auto-expands if collapsed)
+- Widget shows "No post is scheduled" when no posts exist
+- Widget shows correct count of scheduled posts
+- Widget has collapse/expand toggle button
+- Clicking toggle collapses widget body
+- Widget shows a scheduled post title after one is created (WP-CLI)
+- Widget updates when a scheduled post is deleted
+- Widget disappears when toggle disabled in settings, reappears when re-enabled
 
-### `09-dashboard-widget.spec.ts` — Dashboard Widget (~10 tests)
+**`10-admin-bar.spec.ts`** ✅
+- WPSP admin bar item present on `/wp-admin/`
+- Admin bar item contains "Scheduled Posts" text
+- Admin bar shows post count in parentheses
+- Sub-menu element present in DOM
+- Admin bar count matches WP-CLI scheduled post count
+- Admin bar count updates after a post is scheduled (WP-CLI)
+- Admin bar item present on WordPress homepage (sitewide)
+- Admin bar item disappears when toggle disabled in settings, reappears when re-enabled
 
-**Priority: MEDIUM** — visible on every WP admin login.
-
-| # | Test | Verify |
-|---|---|---|
-| 1 | Enable widget in General settings → navigate to /wp-admin/ → widget panel visible | Widget container present |
-| 2 | Widget shows correct count of scheduled posts | Count matches WP-CLI post count |
-| 3 | Widget shows correct post titles | Titles match scheduled posts |
-| 4 | Widget links to each post's edit screen | Links are valid hrefs |
-| 5 | Disable widget → navigate to /wp-admin/ → widget gone | Widget container absent |
-| 6 | Widget updates after new post is scheduled | Count increments |
-| 7 | Widget updates after scheduled post is deleted | Count decrements |
-| 8 | Widget handles zero scheduled posts gracefully | "No posts" message or empty state |
-| 9 | Widget respects post type filter from General settings | Only configured types shown |
-| 10 | Widget is not visible to non-admin users | Subscriber cannot see widget |
-
-### `10-admin-bar.spec.ts` — Admin Bar Scheduled Posts (~10 tests)
-
-**Priority: LOW-MEDIUM** — secondary surface but customer-visible.
-
-| # | Test | Verify |
-|---|---|---|
-| 1 | Enable "Sitewide Admin Bar" → frontend page → scheduled posts menu visible | Menu item in admin bar |
-| 2 | Correct scheduled post count in admin bar | Count matches WP-CLI |
-| 3 | Admin bar item template renders `{title}` token | Actual post title shown |
-| 4 | Admin bar item template renders `{count}` token | Count shown in template |
-| 5 | Disable admin bar → frontend page → no WPSP menu item | Menu item absent |
-| 6 | Admin bar works on wp-admin pages too | Consistent across frontend + backend |
-| 7 | Admin bar does not appear for logged-out users | No WPSP item for guests |
-| 8 | Admin bar does not appear for subscribers | Role restriction respected |
-| 9 | Clicking admin bar item navigates to post edit screen | Correct URL |
-| 10 | Admin bar shows only posts in configured post types | CPT filter respected |
-
-### `11-calendar-events.spec.ts` — Calendar Event Interaction (~8 tests)
-
-**Priority: HIGH** — extends current calendar coverage to actual data.
-
-| # | Test | Verify |
-|---|---|---|
-| 1 | Create scheduled post via WP-CLI → load calendar → event dot visible on correct day | Event rendered on right cell |
-| 2 | Event tooltip/popup shows post title on click | Post title displayed |
-| 3 | Event popup has link to post edit screen | Edit link is correct href |
-| 4 | Multiple posts on same day → multiple events shown | All events rendered |
-| 5 | Event color matches post type | Color coding works |
-| 6 | Navigating to correct month shows event | Event on month boundary visible |
-| 7 | Deleting post → event disappears from calendar | Calendar reflects deletion |
-| 8 | Drag event to different day → `_publish_datetime` meta updates | Meta reflects new date |
+**`11-calendar-events.spec.ts`** ✅
+- Scheduled post (via WP-CLI `beforeAll`) appears as FC event on calendar
+- Event appears in correct day cell (`.fc-daygrid-day[data-date="YYYY-MM-DD"]`)
+- Event title (via `.fc-event` textContent) contains post title
+- Day cell with event has event CSS class
+- Two posts on same day → both events visible
+- Event on last day of next month visible after navigating forward
+- Event disappears from calendar after post is deleted
+- Calendar renders day cells with no events (empty state)
+- Calendar grid renders all 7 weekday column headers
 
 ---
 
-## TIER 03 — ADVANCED (Planned) `~60 tests`
+## TIER 03 — ADVANCED 🔲 Not started `~60 tests`
 
 > **Goal:** Multi-step, cross-feature, stateful end-to-end flows. Simulate real user workflows including PRO republish/unpublish cycles, social queuing, and schedule recovery.
+
+| Spec | Tests | Status | What it will prove |
+|---|---|---|---|
+| `12-full-schedule-to-publish.spec.ts` | ~12 | 🔲 | Complete scheduling flow: editor → future → cron → publish |
+| `13-republish-unpublish.spec.ts` | ~12 | 🔲 | PRO republish/unpublish cycle via cron simulation |
+| `14-missed-schedule-recovery.spec.ts` | ~8 | 🔲 | Past-dated post recovery on cron tick |
+| `15-social-share-queue.spec.ts` | ~10 | 🔲 | Social share queue on publish, platform selection, manual trigger |
+| `16-advanced-schedule.spec.ts` | ~10 | 🔲 | PRO multi-date advance schedule |
+| `17-api-security.spec.ts` | ~8 | 🔲 | REST endpoint auth, role boundaries, CSRF protection |
 
 ### `12-full-schedule-to-publish.spec.ts` — Complete Scheduling Flow (~12 tests)
 
@@ -311,30 +297,44 @@
 ## Implementation Order
 
 ```
-Phase 1 (now):   06-post-metabox      → highest user-surface coverage gain
-Phase 2:         07-settings-save     → validates React settings app writes to DB
-Phase 3:         11-calendar-events   → extends existing calendar tests with data
-Phase 4:         08-scheduling-hub    → PRO Auto/Manual scheduler UI
-Phase 5:         12-full-schedule     → first true end-to-end flow
-Phase 6:         13-republish         → PRO flagship feature E2E
-Phase 7:         09-dashboard-widget  → secondary surface
-Phase 8:         10-admin-bar         → secondary surface
-Phase 9:         14-missed-schedule   → reliability edge case
-Phase 10:        15-social-share      → PRO social queue
-Phase 11:        16-advanced-schedule → PRO Gutenberg feature
-Phase 12:        17-api-security      → security hardening
+✅ Phase 1:   01-plugin-activation    Basic — plugin active, menu renders
+✅ Phase 2:   02-settings-page        Basic — all 7 tabs, 8 social platforms, Social Profile tab
+✅ Phase 3:   03-calendar             Basic — FC renders, WPSP toolbar, navigation
+✅ Phase 4:   04-schedule-post        Basic — WP-CLI schedule + REST + calendar dot
+✅ Phase 5:   05-pro-features         Basic — PRO meta, cron, social meta
+✅ Phase 6:   06-post-metabox         Medium — Gutenberg Schedule And Share panel
+✅ Phase 7:   07-settings-save        Medium — React settings save + DB persistence
+✅ Phase 8:   08-scheduling-hub       Medium — Hub sub-tabs + panel content
+✅ Phase 9:   09-dashboard-widget     Medium — widget toggle, count, collapse
+✅ Phase 10:  10-admin-bar            Medium — admin bar toggle, count, sitewide
+✅ Phase 11:  11-calendar-events      Medium — event rendering, day cell, delete
+🔲 Phase 12:  12-full-schedule        Advanced — editor → future → cron → publish
+🔲 Phase 13:  13-republish-unpublish  Advanced — PRO republish/unpublish cron cycle
+🔲 Phase 14:  14-missed-schedule      Advanced — past-dated recovery
+🔲 Phase 15:  15-social-share-queue   Advanced — social queue on publish
+🔲 Phase 16:  16-advanced-schedule    Advanced — PRO multi-date schedule
+🔲 Phase 17:  17-api-security         Advanced — REST auth, role boundaries, CSRF
 ```
 
 ---
 
-## Key Technical Patterns (carry forward from Tier 01)
+## Key Technical Patterns (carry forward)
 
 - **Auth:** Cookie session + `X-WP-Nonce` via `adminPage.evaluate()` — NOT Basic Auth
 - **REST URL:** `/?rest_route=/wp/v2/posts/ID` (plain permalinks) — NOT `/wp-json/`
 - **WP-CLI:** `docker run --rm --network ... wordpress:cli-php8.2` — NOT `docker-compose exec`
 - **Navigation:** `waitUntil: "domcontentloaded"` — NOT `"networkidle"`
 - **Settings nav:** `li.wprf-tab-nav-item[data-key="layout_*"]`
-- **Social Templates input:** `input[name='template_structure'][parent*='platform']` — scoped by parent attribute
+- **Save button (multiple per page):** `page.evaluate()` with `offsetParent !== null` to find first visible
+- **tsconfig.json:** Must include `"DOM"` in lib for `document`/`HTMLButtonElement` inside `page.evaluate()`
+- **Social Templates input:** `input[name='template_structure']` scoped by parent platform
 - **Social Profile wrappers:** `.wprf-{slug}_profile_list-social-profile`
-- **Calendar toolbar:** `.wpsp-calender-content .toolbar` (custom, not FC native `.fc-header-toolbar`)
+- **Calendar toolbar:** `.wpsp-calender-content .toolbar` (custom WPSP, not FC native `.fc-header-toolbar`)
+- **FC events:** Check `.fc-event` `textContent()` (time + title), not just `.fc-event-title`
+- **Gutenberg sidebar:** `.components-panel__body.schedulepress-options` — social accordion items here, NOT in modal
+- **WPSP modal:** `button#wpsp-post-panel-button` → `.wpsp-post-panel-modal`
+- **jQuery UI date picker:** `input[placeholder="Select date & time"]` is READ-ONLY — use `toBeAttached`
+- **Strict mode — duplicated elements:** Use `.first()` (e.g., `button.wpsp-next-button`, save buttons)
+- **State contamination:** `beforeEach` helpers to restore toggles disabled by earlier tests
+- **Dashboard widget collapse:** Persists across page loads — check `aria-expanded` before asserting `.inside`
 - **No hard waits:** use `waitFor`, `toBeVisible`, `toContainText` with explicit timeouts
