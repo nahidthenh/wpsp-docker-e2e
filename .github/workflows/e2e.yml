@@ -98,18 +98,20 @@ jobs:
             run --rm wpcli
           echo "WordPress setup complete."
 
-      # ── Final readiness check ───────────────────────────────────────────────
+      # ── Final readiness check after wp-setup.sh ────────────────────────────
+      # Follow redirects (-L) so WordPress login page (which may 302 briefly)
+      # resolves to 200 once WordPress is fully installed and configured.
       - name: Final WordPress readiness check
         run: |
-          for i in $(seq 1 12); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/wp-login.php)
+          for i in $(seq 1 24); do
+            STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" http://localhost:8080/wp-login.php)
             if [ "$STATUS" = "200" ]; then
-              echo "WordPress ready (HTTP 200)"; exit 0
+              echo "WordPress ready (HTTP 200 after redirects)"; exit 0
             fi
-            echo "Attempt $i: HTTP $STATUS — waiting 5s..."
+            echo "Attempt $i/24: HTTP $STATUS — waiting 5s..."
             sleep 5
           done
-          echo "WordPress not ready after 60s"
+          echo "WordPress not ready after 120s"
           docker compose -f docker-compose.yml -f docker-compose.ci.yml logs wordpress
           exit 1
 
