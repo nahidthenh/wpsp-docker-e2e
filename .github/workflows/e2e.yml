@@ -89,6 +89,24 @@ jobs:
       - name: Wait for WordPress to be ready
         run: bash docker/wait-for-wp.sh http://localhost:8080 60
 
+      # ── Wait for MySQL to be fully healthy before running wpcli ───────────
+      # `docker compose run` does NOT wait for service_healthy conditions,
+      # so we poll the db container's health status explicitly.
+      - name: Wait for MySQL to be healthy
+        run: |
+          echo "Waiting for MySQL container to be healthy..."
+          for i in $(seq 1 40); do
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' wpsp_db 2>/dev/null || echo "missing")
+            if [ "$STATUS" = "healthy" ]; then
+              echo "MySQL is healthy (attempt $i)"; exit 0
+            fi
+            echo "  Attempt $i/40: status=$STATUS — waiting 5s..."
+            sleep 5
+          done
+          echo "MySQL did not become healthy after 200s"
+          docker inspect wpsp_db || true
+          exit 1
+
       # ── Run WP-CLI setup ────────────────────────────────────────────────────
       - name: Run WordPress setup via WP-CLI
         run: |
