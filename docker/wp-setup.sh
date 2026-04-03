@@ -16,7 +16,12 @@ done
 echo "✅ WordPress files found."
 
 echo "⏳ Waiting for MySQL to accept connections..."
-until mysqladmin ping -h "${WORDPRESS_DB_HOST%%:*}" -u "${WORDPRESS_DB_USER}" -p"${WORDPRESS_DB_PASSWORD}" --silent 2>/dev/null; do
+DB_HOST="${WORDPRESS_DB_HOST%%:*}"
+until php -r "
+  \$c = @mysqli_connect('${DB_HOST}', '${WORDPRESS_DB_USER}', '${WORDPRESS_DB_PASSWORD}', '${WORDPRESS_DB_NAME}');
+  if (\$c) { mysqli_close(\$c); exit(0); }
+  exit(1);
+" 2>/dev/null; do
   echo "  Database not ready yet, waiting 3s..."
   sleep 3
 done
