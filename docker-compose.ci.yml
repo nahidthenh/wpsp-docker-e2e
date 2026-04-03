@@ -1,0 +1,14 @@
+# CI override — removes local plugin volume mounts.
+# Merged with docker-compose.yml via: docker compose -f docker-compose.yml -f docker-compose.ci.yml
+# wp-setup.sh installs the free plugin from WordPress.org automatically when
+# the plugin directory is absent (i.e. not volume-mounted from source).
+services:
+  wordpress:
+    volumes:
+      - wp_data:/var/www/html
+      - ./docker/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+
+  wpcli:
+    volumes:
+      - wp_data:/var/www/html
+      - ./docker/wp-setup.sh:/wp-setup.sh:ro

@@ -60,21 +60,27 @@ wp option update siteurl "${WP_URL}" --path="${WP_PATH}" --allow-root
 wp option update home    "${WP_URL}" --path="${WP_PATH}" --allow-root
 
 # ── Activate plugins ─────────────────────────────────────────────────────────
-echo "🔌 Activating SchedulePress (free)..."
-if [ -d "${WP_PATH}/wp-content/plugins/wp-scheduled-posts" ]; then
+
+# Free plugin: use volume-mounted source if present, otherwise install from WordPress.org
+FREE_PLUGIN_DIR="${WP_PATH}/wp-content/plugins/wp-scheduled-posts"
+if [ -d "${FREE_PLUGIN_DIR}" ] && [ -n "$(ls -A "${FREE_PLUGIN_DIR}" 2>/dev/null)" ]; then
+  echo "🔌 Activating SchedulePress (free) from mounted source..."
   wp plugin activate wp-scheduled-posts --path="${WP_PATH}" --allow-root
-  echo "✅ wp-scheduled-posts activated."
+  echo "✅ wp-scheduled-posts activated (from source)."
 else
-  echo "⚠️  wp-scheduled-posts plugin folder not found — skipping."
+  echo "📦 Installing SchedulePress (free) from WordPress.org..."
+  wp plugin install wp-scheduled-posts --activate --path="${WP_PATH}" --allow-root
+  echo "✅ wp-scheduled-posts installed and activated (from WordPress.org)."
 fi
 
-# Activate pro if folder is present
-if [ -d "${WP_PATH}/wp-content/plugins/wp-scheduled-posts-pro" ]; then
+# PRO plugin: activate only if folder is present and non-empty (never auto-install PRO)
+PRO_PLUGIN_DIR="${WP_PATH}/wp-content/plugins/wp-scheduled-posts-pro"
+if [ -d "${PRO_PLUGIN_DIR}" ] && [ -n "$(ls -A "${PRO_PLUGIN_DIR}" 2>/dev/null)" ]; then
   echo "🔌 Activating SchedulePress PRO..."
   wp plugin activate wp-scheduled-posts-pro --path="${WP_PATH}" --allow-root
   echo "✅ wp-scheduled-posts-pro activated."
 else
-  echo "ℹ️  wp-scheduled-posts-pro not found — skipping (free-only mode)."
+  echo "ℹ️  wp-scheduled-posts-pro not found — running in free-only mode."
 fi
 
 # ── Permalink structure (post_name required for pretty URLs) ─────────────────
