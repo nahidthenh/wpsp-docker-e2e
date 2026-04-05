@@ -121,7 +121,7 @@ jobs:
           PAGES_URL:                  "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         run: |
           PATTERN="${{ github.event.inputs.test_pattern }}"
-          npx playwright test ${PATTERN} --reporter=github,html
+          npx playwright test ${PATTERN}
 
       - name: Upload Playwright HTML report
         uses: actions/upload-artifact@v4
