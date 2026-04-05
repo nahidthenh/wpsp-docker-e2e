@@ -28,6 +28,7 @@ export default defineConfig({
           {
             channels: [process.env.SLACK_CHANNEL_ID],
             sendResults: "always",
+            maxNumberOfFailuresToShow: 0,
             meta: [
               {
                 key: ":wpsp: Automation - Test Results",
@@ -37,7 +38,7 @@ export default defineConfig({
           },
         ],
       ]
-    : [["list"], ["html", { outputFolder: "playwright-report", open: "on-failure" }]],
+    : [["list"], ["html", { outputFolder: "playwright-report", open: "never" }]],
 
   // ── Global setup / teardown ──────────────────────────────────────────────────
   globalSetup: "./global-setup.ts",
