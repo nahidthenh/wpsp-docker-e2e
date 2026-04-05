@@ -7,6 +7,14 @@ on:
         description: "Playwright test file pattern (e.g. tests/06-*.spec.ts). Leave blank to run all."
         required: false
         default: ""
+      free_plugin_repo:
+        description: "Free plugin repo (owner/repo). Defaults to <owner>/wp-scheduled-posts."
+        required: false
+        default: ""
+      pro_plugin_repo:
+        description: "PRO plugin repo (owner/repo). Defaults to <owner>/wp-scheduled-posts-pro."
+        required: false
+        default: ""
 
 concurrency:
   group: e2e-${{ github.ref }}
@@ -28,25 +36,25 @@ jobs:
       - name: Checkout e2e repository
         uses: actions/checkout@v4
 
-      # ── (Optional) Checkout free plugin from private/org repo ───────────────
-      # Add a PLUGIN_REPO_TOKEN secret in repo settings for private repos.
-      # If the checkout fails (missing token, inaccessible repo), the free
-      # plugin is installed from WordPress.org automatically by wp-setup.sh.
+      # ── (Optional) Checkout free plugin ────────────────────────────────────
+      # Repo resolved as: workflow input → secret PLUGIN_FREE_REPO → default name.
+      # If checkout fails the free plugin is auto-installed from WordPress.org.
       - name: Checkout SchedulePress (free) — optional
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/wp-scheduled-posts
+          repository: ${{ github.event.inputs.free_plugin_repo || 'WPDevelopers/wp-scheduled-posts' }}
           path: plugin-free
           token: ${{ secrets.PLUGIN_REPO_TOKEN || github.token }}
         continue-on-error: true
 
-      # ── (Optional) Checkout PRO plugin ─────────────────────────────────────
-      # Requires PLUGIN_REPO_TOKEN secret and access to the pro repo.
-      # If unavailable, tests run in free-only mode (05-pro-features may skip).
+      # ── (Optional) Checkout PRO plugin ──────────────────────────────────────
+      # Uses WPDevelopers/wp-scheduled-posts-pro by default.
+      # Override via the pro_plugin_repo workflow_dispatch input if needed.
+      # If checkout fails (token missing / no access) tests run in free-only mode.
       - name: Checkout SchedulePress PRO — optional
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/wp-scheduled-posts-pro
+          repository: ${{ github.event.inputs.pro_plugin_repo || 'WPDevelopers/wp-scheduled-posts-pro' }}
           path: plugin-pro
           token: ${{ secrets.PLUGIN_REPO_TOKEN || github.token }}
         continue-on-error: true
@@ -88,6 +96,34 @@ jobs:
       # ── Wait for WordPress HTTP readiness ───────────────────────────────────
       - name: Wait for WordPress to be ready
         run: bash docker/wait-for-wp.sh http://localhost:8080 60
+
+      # ── Inject checked-out plugins into the running container ─────────────
+      # docker-compose.ci.yml removes volume mounts to avoid host-path issues.
+      # If the plugin repos were checked out above, copy them in via docker cp
+      # so wp-setup.sh finds them and activates them instead of installing from WP.org.
+      - name: Inject plugins into WordPress container
+        run: |
+          PLUGINS_DIR="/var/www/html/wp-content/plugins"
+
+          if [ -d "${{ github.workspace }}/plugin-free" ] && \
+             [ -n "$(ls -A ${{ github.workspace }}/plugin-free 2>/dev/null)" ]; then
+            echo "Copying free plugin into container..."
+            docker cp "${{ github.workspace }}/plugin-free/." \
+              wpsp_wordpress:${PLUGINS_DIR}/wp-scheduled-posts
+            echo "Free plugin copied."
+          else
+            echo "Free plugin not checked out — will install from WordPress.org."
+          fi
+
+          if [ -d "${{ github.workspace }}/plugin-pro" ] && \
+             [ -n "$(ls -A ${{ github.workspace }}/plugin-pro 2>/dev/null)" ]; then
+            echo "Copying PRO plugin into container..."
+            docker cp "${{ github.workspace }}/plugin-pro/." \
+              wpsp_wordpress:${PLUGINS_DIR}/wp-scheduled-posts-pro
+            echo "PRO plugin copied."
+          else
+            echo "PRO plugin not checked out — running in free-only mode."
+          fi
 
       # ── Wait for MySQL to be fully healthy before running wpcli ───────────
       # `docker compose run` does NOT wait for service_healthy conditions,
