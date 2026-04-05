@@ -37,7 +37,7 @@ jobs:
       - name: Checkout SchedulePress free plugin
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.inputs.free_plugin_repo || 'WPDevelopers/wp-scheduled-posts' }}
+          repository: WPDevelopers/wp-scheduled-posts
           path: plugin-free
           token: ${{ secrets.PLUGIN_REPO_TOKEN || github.token }}
         continue-on-error: true
@@ -45,7 +45,7 @@ jobs:
       - name: Checkout SchedulePress PRO plugin
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.inputs.pro_plugin_repo || 'WPDevelopers/wp-scheduled-posts-pro' }}
+          repository: WPDevelopers/wp-scheduled-posts-pro
           path: plugin-pro
           token: ${{ secrets.PLUGIN_REPO_TOKEN || github.token }}
         continue-on-error: true
