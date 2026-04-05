@@ -20,7 +20,24 @@ export default defineConfig({
 
   // ── Reporters ────────────────────────────────────────────────────────────────
   reporter: process.env.CI
-    ? [["github"], ["html", { outputFolder: "playwright-report", open: "never" }]]
+    ? [
+        ["github"],
+        ["html", { outputFolder: "playwright-report", open: "never" }],
+        [
+          "playwright-slack-report/dist/src/SlackReporter",
+          {
+            slackOAuthToken: process.env.SLACK_BOT_USER_OAUTH_TOKEN,
+            slackChannelIdOrName: process.env.SLACK_CHANNEL_ID,
+            sendResults: "always", // 'always' | 'on-failure' | 'off'
+            showInThread: true,
+            meta: [
+              { key: "Run",     value: `#${process.env.GITHUB_RUN_NUMBER ?? "local"}` },
+              { key: "Triggered by", value: process.env.GITHUB_ACTOR ?? "local" },
+              { key: "Report",  value: process.env.PAGES_URL ?? "" },
+            ],
+          },
+        ],
+      ]
     : [["list"], ["html", { outputFolder: "playwright-report", open: "on-failure" }]],
 
   // ── Global setup / teardown ──────────────────────────────────────────────────
