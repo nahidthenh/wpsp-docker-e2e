@@ -33,6 +33,12 @@ setup("authenticate as admin", async ({ page }) => {
   await submitBtn.waitFor({ state: "visible", timeout: 10_000 });
   await submitBtn.click();
 
+  // Dismiss "Remind me later" prompt if WordPress shows it (not always present)
+  const remindLater = page.getByRole("link", { name: "Remind me later" });
+  if (await remindLater.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    await remindLater.click();
+  }
+
   // Wait for redirect to wp-admin (regex handles trailing-slash and sub-paths)
   await page.waitForURL(/wp-admin/, { timeout: 45_000 });
   await expect(page.locator("#wpadminbar")).toBeVisible({ timeout: 15_000 });
