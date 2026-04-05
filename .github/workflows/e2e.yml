@@ -4,15 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       test_pattern:
-        description: "Playwright test file pattern (e.g. tests/06-*.spec.ts). Leave blank to run all."
+        description: "Test file pattern (e.g. tests/03-advanced/*.spec.ts). Leave blank to run all."
         required: false
         default: ""
       free_plugin_repo:
-        description: "Free plugin repo (owner/repo). Defaults to <owner>/wp-scheduled-posts."
+        description: "Free plugin repo override (owner/repo). Default: WPDevelopers/wp-scheduled-posts"
         required: false
         default: ""
       pro_plugin_repo:
-        description: "PRO plugin repo (owner/repo). Defaults to <owner>/wp-scheduled-posts-pro."
+        description: "PRO plugin repo override (owner/repo). Default: WPDevelopers/wp-scheduled-posts-pro"
         required: false
         default: ""
 
@@ -32,14 +32,12 @@ jobs:
       WP_ADMIN_PASS: admin
 
     steps:
-      # ── Checkout e2e repository ─────────────────────────────────────────────
       - name: Checkout e2e repository
         uses: actions/checkout@v4
 
-      # ── (Optional) Checkout free plugin ────────────────────────────────────
-      # Repo resolved as: workflow input → secret PLUGIN_FREE_REPO → default name.
-      # If checkout fails the free plugin is auto-installed from WordPress.org.
-      - name: Checkout SchedulePress (free) — optional
+      # Plugin repos are public on WPDevelopers. PLUGIN_REPO_TOKEN is only
+      # needed if either repo is private.
+      - name: Checkout SchedulePress free plugin
         uses: actions/checkout@v4
         with:
           repository: ${{ github.event.inputs.free_plugin_repo || 'WPDevelopers/wp-scheduled-posts' }}
@@ -47,11 +45,7 @@ jobs:
           token: ${{ secrets.PLUGIN_REPO_TOKEN || github.token }}
         continue-on-error: true
 
-      # ── (Optional) Checkout PRO plugin ──────────────────────────────────────
-      # Uses WPDevelopers/wp-scheduled-posts-pro by default.
-      # Override via the pro_plugin_repo workflow_dispatch input if needed.
-      # If checkout fails (token missing / no access) tests run in free-only mode.
-      - name: Checkout SchedulePress PRO — optional
+      - name: Checkout SchedulePress PRO plugin
         uses: actions/checkout@v4
         with:
           repository: ${{ github.event.inputs.pro_plugin_repo || 'WPDevelopers/wp-scheduled-posts-pro' }}
@@ -59,7 +53,6 @@ jobs:
           token: ${{ secrets.PLUGIN_REPO_TOKEN || github.token }}
         continue-on-error: true
 
-      # ── Node.js ─────────────────────────────────────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -69,122 +62,58 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      # ── Playwright browsers ─────────────────────────────────────────────────
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      # ── Make scripts executable ─────────────────────────────────────────────
       - name: Make helper scripts executable
         run: chmod +x docker/wp-setup.sh docker/wait-for-wp.sh
 
-      # ── Start Docker stack (CI override removes plugin volume mounts) ───────
+      # PLUGIN_FREE_PATH / PLUGIN_PRO_PATH point docker-compose.yml bind mounts
+      # at the checked-out plugin dirs. If a checkout failed, Docker Compose
+      # creates the path as an empty dir and wp-setup.sh installs from WP.org.
       - name: Start Docker Compose stack
         run: |
-          # Resolve plugin paths: use checked-out source if present, else empty placeholder
-          FREE_PATH="${{ github.workspace }}/plugin-free"
-          PRO_PATH="${{ github.workspace }}/plugin-pro"
+          PLUGIN_FREE_PATH="${{ github.workspace }}/plugin-free" \
+          PLUGIN_PRO_PATH="${{ github.workspace }}/plugin-pro" \
+          docker compose up -d db wordpress
 
-          # docker-compose.ci.yml overrides strip the plugin mounts entirely;
-          # wp-setup.sh installs the free plugin from WordPress.org automatically.
-          PLUGIN_FREE_PATH="${FREE_PATH}" \
-          PLUGIN_PRO_PATH="${PRO_PATH}" \
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml \
-            up -d db wordpress
-
-          echo "Docker containers started."
-
-      # ── Wait for WordPress HTTP readiness ───────────────────────────────────
       - name: Wait for WordPress to be ready
         run: bash docker/wait-for-wp.sh http://localhost:8080 60
 
-      # ── Inject checked-out plugins into the running container ─────────────
-      # docker-compose.ci.yml removes volume mounts to avoid host-path issues.
-      # If the plugin repos were checked out above, copy them in via docker cp
-      # so wp-setup.sh finds them and activates them instead of installing from WP.org.
-      - name: Inject plugins into WordPress container
-        run: |
-          PLUGINS_DIR="/var/www/html/wp-content/plugins"
-
-          if [ -d "${{ github.workspace }}/plugin-free" ] && \
-             [ -n "$(ls -A ${{ github.workspace }}/plugin-free 2>/dev/null)" ]; then
-            echo "Copying free plugin into container..."
-            docker cp "${{ github.workspace }}/plugin-free/." \
-              wpsp_wordpress:${PLUGINS_DIR}/wp-scheduled-posts
-            echo "Free plugin copied."
-          else
-            echo "Free plugin not checked out — will install from WordPress.org."
-          fi
-
-          if [ -d "${{ github.workspace }}/plugin-pro" ] && \
-             [ -n "$(ls -A ${{ github.workspace }}/plugin-pro 2>/dev/null)" ]; then
-            echo "Copying PRO plugin into container..."
-            docker cp "${{ github.workspace }}/plugin-pro/." \
-              wpsp_wordpress:${PLUGINS_DIR}/wp-scheduled-posts-pro
-            echo "PRO plugin copied."
-          else
-            echo "PRO plugin not checked out — running in free-only mode."
-          fi
-
-      # ── Wait for MySQL to be fully healthy before running wpcli ───────────
-      # `docker compose run` does NOT wait for service_healthy conditions,
-      # so we poll the db container's health status explicitly.
+      # docker compose run does not honour service_healthy depends_on conditions,
+      # so we poll the db container health status before running wpcli.
       - name: Wait for MySQL to be healthy
         run: |
-          echo "Waiting for MySQL container to be healthy..."
           for i in $(seq 1 40); do
             STATUS=$(docker inspect --format='{{.State.Health.Status}}' wpsp_db 2>/dev/null || echo "missing")
-            if [ "$STATUS" = "healthy" ]; then
-              echo "MySQL is healthy (attempt $i)"; exit 0
-            fi
-            echo "  Attempt $i/40: status=$STATUS — waiting 5s..."
+            [ "$STATUS" = "healthy" ] && echo "MySQL healthy (attempt $i)" && exit 0
+            echo "  Attempt $i/40: $STATUS — waiting 5s..."
             sleep 5
           done
-          echo "MySQL did not become healthy after 200s"
-          docker inspect wpsp_db || true
-          exit 1
+          echo "MySQL not healthy after 200s"; docker inspect wpsp_db || true; exit 1
 
-      # ── Run WP-CLI setup ────────────────────────────────────────────────────
       - name: Run WordPress setup via WP-CLI
         run: |
           PLUGIN_FREE_PATH="${{ github.workspace }}/plugin-free" \
           PLUGIN_PRO_PATH="${{ github.workspace }}/plugin-pro" \
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml \
-            run --rm wpcli
-          echo "WordPress setup complete."
+          docker compose run --rm wpcli
 
-      # ── Final readiness check after wp-setup.sh ────────────────────────────
-      # Follow redirects (-L) so WordPress login page (which may 302 briefly)
-      # resolves to 200 once WordPress is fully installed and configured.
+      # After wp-setup.sh installs WordPress, wp-login.php must return HTTP 200.
       - name: Final WordPress readiness check
         run: |
           for i in $(seq 1 24); do
             STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" http://localhost:8080/wp-login.php)
-            if [ "$STATUS" = "200" ]; then
-              echo "WordPress ready (HTTP 200 after redirects)"; exit 0
-            fi
-            echo "Attempt $i/24: HTTP $STATUS — waiting 5s..."
+            [ "$STATUS" = "200" ] && echo "WordPress ready" && exit 0
+            echo "  Attempt $i/24: HTTP $STATUS — waiting 5s..."
             sleep 5
           done
-          echo "WordPress not ready after 120s"
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs wordpress
-          exit 1
+          echo "WordPress not ready after 120s"; docker compose logs wordpress; exit 1
 
-      # ── Run Playwright tests ────────────────────────────────────────────────
       - name: Run Playwright E2E tests
         run: |
           PATTERN="${{ github.event.inputs.test_pattern }}"
-          if [ -n "${PATTERN}" ]; then
-            npx playwright test ${PATTERN} --reporter=github,html
-          else
-            npx playwright test --reporter=github,html
-          fi
-        env:
-          WP_BASE_URL:   http://localhost:8080
-          WP_ADMIN_USER: admin
-          WP_ADMIN_PASS: admin
-          CI: "true"
+          npx playwright test ${PATTERN} --reporter=github,html
 
-      # ── Upload HTML report (always) ─────────────────────────────────────────
       - name: Upload Playwright HTML report
         uses: actions/upload-artifact@v4
         if: always()
@@ -193,8 +122,7 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
-      # ── Upload traces/screenshots/videos (on failure) ───────────────────────
-      - name: Upload test result artifacts
+      - name: Upload test result artifacts (traces, screenshots, videos)
         uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -202,16 +130,12 @@ jobs:
           path: test-results/
           retention-days: 7
 
-      # ── Docker logs on failure ──────────────────────────────────────────────
       - name: Dump Docker logs on failure
         if: failure()
         run: |
-          echo "=== WordPress container logs ==="
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs wordpress
-          echo "=== MySQL container logs ==="
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs db
+          docker compose logs wordpress
+          docker compose logs db
 
-      # ── Teardown ────────────────────────────────────────────────────────────
       - name: Stop Docker Compose stack
         if: always()
-        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v
+        run: docker compose down -v
