@@ -76,6 +76,8 @@ test.describe("SchedulePress Settings Page", () => {
     await expect(hub).toBeVisible({ timeout: 15_000 });
     await hub.click();
 
+    await adminPage.getByText('Manage Schedule').click();
+
     // Auto Scheduler section/toggle should appear in the panel
     const autoTab = adminPage.locator("a, button, li, span, h2, h3, label").filter({ hasText: /Auto.?Sched/i }).first();
     await expect(autoTab).toBeVisible({ timeout: 15_000 });
@@ -86,6 +88,8 @@ test.describe("SchedulePress Settings Page", () => {
     const hub = adminPage.locator("a, button, li, span").filter({ hasText: /^Scheduling Hub$/i }).first();
     await expect(hub).toBeVisible({ timeout: 15_000 });
     await hub.click();
+
+    await adminPage.getByText('Manage Schedule').click();
 
     // Manual Scheduler section/toggle should appear in the panel
     const manualTab = adminPage.locator("a, button, li, span, h2, h3, label").filter({ hasText: /Manual.?Sched/i }).first();
@@ -257,7 +261,7 @@ test.describe("SchedulePress Settings – General Tab", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test.describe("SchedulePress Settings – Social Profile Tab", () => {
-  const NAV_SELECTOR   = 'li.wprf-tab-nav-item[data-key="layout_social_profile"]';
+  const NAV_SELECTOR = 'li.wprf-tab-nav-item[data-key="layout_social_profile"]';
   const PANEL_SELECTOR = ".wprf-tab-layout_social_profile";
 
   /** Selector for an individual platform's wrapper div. */
@@ -265,14 +269,14 @@ test.describe("SchedulePress Settings – Social Profile Tab", () => {
     `.wprf-${slug}_profile_list-social-profile`;
 
   const platforms = [
-    { slug: "facebook",               label: "Facebook"              },
-    { slug: "twitter",                label: "Twitter"               },
-    { slug: "linkedin",               label: "LinkedIn"              },
-    { slug: "pinterest",              label: "Pinterest"             },
-    { slug: "instagram",              label: "Instagram"             },
-    { slug: "medium",                 label: "Medium"                },
-    { slug: "threads",                label: "Threads"               },
-    { slug: "google_business",         label: "Google Business Profile"},
+    { slug: "facebook", label: "Facebook" },
+    { slug: "twitter", label: "Twitter" },
+    { slug: "linkedin", label: "LinkedIn" },
+    { slug: "pinterest", label: "Pinterest" },
+    { slug: "instagram", label: "Instagram" },
+    { slug: "medium", label: "Medium" },
+    { slug: "threads", label: "Threads" },
+    { slug: "google_business", label: "Google Business Profile" },
   ];
 
   test.beforeEach(async ({ adminPage }) => {
@@ -415,7 +419,7 @@ test.describe("SchedulePress Settings – Email Notify Tab", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test.describe("SchedulePress Settings – Social Templates Tab", () => {
-  const NAV_SELECTOR      = 'li.wprf-tab-nav-item[data-key="layout_social_template"]';
+  const NAV_SELECTOR = 'li.wprf-tab-nav-item[data-key="layout_social_template"]';
   const PLATFORM_SELECTOR = (key: string) => `li.wprf-tab-nav-item[data-key="${key}"]`;
 
   test.beforeEach(async ({ adminPage }) => {
@@ -433,14 +437,14 @@ test.describe("SchedulePress Settings – Social Templates Tab", () => {
   // ── Platform sub-tabs ──────────────────────────────────────────────────
 
   const platforms = [
-    { key: "layouts_facebook",        label: "Facebook"       },
-    { key: "layouts_twitter",         label: "Twitter"        },
-    { key: "layouts_linkedin",        label: "LinkedIn"       },
-    { key: "layouts_pinterest",       label: "Pinterest"      },
-    { key: "layouts_instagram",       label: "Instagram"      },
-    { key: "layouts_medium",          label: "Medium"         },
-    { key: "layouts_threads",         label: "Threads"        },
-    { key: "layouts_google_business", label: "Google Business"},
+    { key: "layouts_facebook", label: "Facebook" },
+    { key: "layouts_twitter", label: "Twitter" },
+    { key: "layouts_linkedin", label: "LinkedIn" },
+    { key: "layouts_pinterest", label: "Pinterest" },
+    { key: "layouts_instagram", label: "Instagram" },
+    { key: "layouts_medium", label: "Medium" },
+    { key: "layouts_threads", label: "Threads" },
+    { key: "layouts_google_business", label: "Google Business" },
   ];
 
   for (const { key, label } of platforms) {
