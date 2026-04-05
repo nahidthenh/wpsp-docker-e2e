@@ -115,10 +115,6 @@ jobs:
           echo "WordPress not ready after 120s"; docker compose logs wordpress; exit 1
 
       - name: Run Playwright E2E tests
-        env:
-          SLACK_BOT_USER_OAUTH_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID:           ${{ secrets.SLACK_CHANNEL_ID }}
-          PAGES_URL:                  "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
         run: |
           PATTERN="${{ github.event.inputs.test_pattern }}"
           npx playwright test ${PATTERN}
@@ -150,6 +146,49 @@ jobs:
           echo "📊 **[View HTML Report](${{ steps.deploy-pages.outputs.page_url }})**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Run \`#${{ github.run_number }}\` — triggered by \`${{ github.actor }}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify Slack
+        if: always()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          PAGES_URL: "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+        run: |
+          [ -z "$SLACK_BOT_TOKEN" ] && echo "No Slack token, skipping." && exit 0
+
+          RESULTS_FILE="test-results/results.json"
+          if [ -f "$RESULTS_FILE" ]; then
+            PASSED=$(node -e "const r=require('./$RESULTS_FILE');console.log(r.stats.expected ?? 0)")
+            FAILED=$(node -e "const r=require('./$RESULTS_FILE');console.log(r.stats.unexpected ?? 0)")
+            FLAKY=$(node -e  "const r=require('./$RESULTS_FILE');console.log(r.stats.flaky ?? 0)")
+            SKIPPED=$(node -e "const r=require('./$RESULTS_FILE');console.log(r.stats.skipped ?? 0)")
+          else
+            PASSED=0; FAILED=0; FLAKY=0; SKIPPED=0
+          fi
+
+          curl -s -X POST "https://slack.com/api/chat.postMessage" \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"channel\": \"$SLACK_CHANNEL_ID\",
+              \"text\": \":white_check_mark: ${PASSED} | :x: ${FAILED} | :large_yellow_circle: ${FLAKY} | :fast_forward: ${SKIPPED}\",
+              \"blocks\": [
+                {
+                  \"type\": \"section\",
+                  \"text\": {
+                    \"type\": \"mrkdwn\",
+                    \"text\": \":white_check_mark: ${PASSED} | :x: ${FAILED} | :large_yellow_circle: ${FLAKY} | :fast_forward: ${SKIPPED}\"
+                  }
+                },
+                {
+                  \"type\": \"section\",
+                  \"text\": {
+                    \"type\": \"mrkdwn\",
+                    \"text\": \":wpsp: Automation - Test Results :   \:desktop_computer\: <${PAGES_URL}|Final Report!>\"
+                  }
+                }
+              ]
+            }"
 
       - name: Upload test result artifacts (traces, screenshots, videos)
         uses: actions/upload-artifact@v4
