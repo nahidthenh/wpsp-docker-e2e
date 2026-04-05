@@ -30,8 +30,8 @@ export default defineConfig({
             sendResults: "always",
             meta: [
               {
-                key: ":wpsp: Automation - Test Results :",
-                value: `🖥️ <${process.env.PAGES_URL}|Final Report!>`,
+                key: ":wpsp: Automation - Test Results",
+                value: `🖥️ <${process.env.PAGES_URL}|View Results!>`,
               },
             ],
           },
