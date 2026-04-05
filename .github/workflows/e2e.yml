@@ -115,6 +115,10 @@ jobs:
           echo "WordPress not ready after 120s"; docker compose logs wordpress; exit 1
 
       - name: Run Playwright E2E tests
+        env:
+          SLACK_BOT_USER_OAUTH_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID:           ${{ secrets.SLACK_CHANNEL_ID }}
+          PAGES_URL:                  "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
         run: |
           PATTERN="${{ github.event.inputs.test_pattern }}"
           npx playwright test ${PATTERN}
@@ -146,54 +150,6 @@ jobs:
           echo "📊 **[View HTML Report](${{ steps.deploy-pages.outputs.page_url }})**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Run \`#${{ github.run_number }}\` — triggered by \`${{ github.actor }}\`" >> $GITHUB_STEP_SUMMARY
-
-      - name: Notify Slack
-        if: always()
-        uses: slackapi/slack-github-action@v1
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          payload: |
-            {
-              "attachments": [
-                {
-                  "color": "${{ job.status == 'success' && '#36a64f' || '#e01e5a' }}",
-                  "blocks": [
-                    {
-                      "type": "section",
-                      "text": {
-                        "type": "mrkdwn",
-                        "text": "${{ job.status == 'success' && ':white_check_mark:' || ':x:' }} *SchedulePress E2E — Run #${{ github.run_number }} ${{ job.status }}*"
-                      }
-                    },
-                    {
-                      "type": "section",
-                      "fields": [
-                        { "type": "mrkdwn", "text": "*Triggered by:*\n${{ github.actor }}" },
-                        { "type": "mrkdwn", "text": "*Branch:*\n${{ github.ref_name }}" },
-                        { "type": "mrkdwn", "text": "*Pattern:*\n${{ github.event.inputs.test_pattern || 'all tests' }}" }
-                      ]
-                    },
-                    {
-                      "type": "actions",
-                      "elements": [
-                        {
-                          "type": "button",
-                          "text": { "type": "plain_text", "text": "View Report" },
-                          "url": "${{ steps.deploy-pages.outputs.page_url }}"
-                        },
-                        {
-                          "type": "button",
-                          "text": { "type": "plain_text", "text": "View Run" },
-                          "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Upload test result artifacts (traces, screenshots, videos)
         uses: actions/upload-artifact@v4
