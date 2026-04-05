@@ -10,7 +10,7 @@
 
 import { test as setup, expect } from "@playwright/test";
 import * as path from "path";
-import * as fs   from "fs";
+import * as fs from "fs";
 
 const AUTH_FILE = path.join(__dirname, "../playwright/.auth/admin.json");
 
@@ -20,14 +20,18 @@ setup("authenticate as admin", async ({ page }) => {
 
   await page.goto("/wp-login.php", { waitUntil: "domcontentloaded" });
 
-  await page.locator("#user_login").fill(
-    process.env.WP_ADMIN_USER ?? "admin"
-  );
-  await page.locator("#user_pass").fill(
-    process.env.WP_ADMIN_PASS ?? "admin"
-  );
-  await page.locator("#rememberme").check();
-  await page.locator("#wp-submit").click();
+  // Wait for the form to be interactive before filling
+  const userLoginField = page.locator("#user_login");
+  await userLoginField.waitFor({ state: "visible", timeout: 30_000 });
+  await userLoginField.fill(process.env.WP_ADMIN_USER ?? "admin");
+
+  const userPassField = page.locator("#user_pass");
+  await userPassField.waitFor({ state: "visible", timeout: 10_000 });
+  await userPassField.fill(process.env.WP_ADMIN_PASS ?? "admin");
+
+  const submitBtn = page.locator("#wp-submit");
+  await submitBtn.waitFor({ state: "visible", timeout: 10_000 });
+  await submitBtn.click();
 
   // Wait for redirect to wp-admin (regex handles trailing-slash and sub-paths)
   await page.waitForURL(/wp-admin/, { timeout: 45_000 });
