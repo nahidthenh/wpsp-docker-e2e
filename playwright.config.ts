@@ -23,7 +23,19 @@ export default defineConfig({
     ? [
         ["github"],
         ["html", { outputFolder: "playwright-report", open: "never" }],
-        ["json", { outputFile: "test-results/results.json" }],
+        [
+          "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
+          {
+            channels: [process.env.SLACK_CHANNEL_ID],
+            sendResults: "always",
+            meta: [
+              {
+                key: ":wpsp: Automation - Test Results :",
+                value: `🖥️ <${process.env.PAGES_URL}|Final Report!>`,
+              },
+            ],
+          },
+        ],
       ]
     : [["list"], ["html", { outputFolder: "playwright-report", open: "on-failure" }]],
 
