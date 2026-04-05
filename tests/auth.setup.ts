@@ -18,7 +18,7 @@ setup("authenticate as admin", async ({ page }) => {
   // Ensure the auth directory exists
   fs.mkdirSync(path.dirname(AUTH_FILE), { recursive: true });
 
-  await page.goto("/wp-login.php", { waitUntil: "networkidle" });
+  await page.goto("/wp-login.php", { waitUntil: "domcontentloaded" });
 
   await page.locator("#user_login").fill(
     process.env.WP_ADMIN_USER ?? "admin"
@@ -29,9 +29,9 @@ setup("authenticate as admin", async ({ page }) => {
   await page.locator("#rememberme").check();
   await page.locator("#wp-submit").click();
 
-  // Verify login succeeded
-  await page.waitForURL("**/wp-admin/**", { timeout: 30_000 });
-  await expect(page.locator("#wpadminbar")).toBeVisible();
+  // Wait for redirect to wp-admin (regex handles trailing-slash and sub-paths)
+  await page.waitForURL(/wp-admin/, { timeout: 45_000 });
+  await expect(page.locator("#wpadminbar")).toBeVisible({ timeout: 15_000 });
 
   // Persist auth state
   await page.context().storageState({ path: AUTH_FILE });
