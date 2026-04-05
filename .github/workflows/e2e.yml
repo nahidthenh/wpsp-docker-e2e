@@ -20,6 +20,11 @@ concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   e2e:
     name: Playwright E2E
@@ -121,6 +126,26 @@ jobs:
           name: playwright-report-${{ github.run_number }}
           path: playwright-report/
           retention-days: 14
+
+      - name: Upload report to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        if: always()
+        with:
+          path: playwright-report/
+
+      - name: Deploy report to GitHub Pages
+        uses: actions/deploy-pages@v4
+        if: always()
+        id: deploy-pages
+
+      - name: Write report URL to job summary
+        if: always()
+        run: |
+          echo "## Playwright Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📊 **[View HTML Report](${{ steps.deploy-pages.outputs.page_url }})**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Run \`#${{ github.run_number }}\` — triggered by \`${{ github.actor }}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload test result artifacts (traces, screenshots, videos)
         uses: actions/upload-artifact@v4
