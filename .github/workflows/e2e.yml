@@ -121,7 +121,7 @@ jobs:
           if [ -n "$PATTERN" ]; then
             # Always run auth setup first, then run specified tests without re-running setup
             npx playwright test tests/auth.setup.ts --project=setup
-            npx playwright test $PATTERN --project=chromium --skip-dependencies
+            npx playwright test $PATTERN --project=chromium --no-deps
           else
             npx playwright test
           fi
