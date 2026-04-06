@@ -40,10 +40,6 @@ export default defineConfig({
       ]
     : [["list"], ["html", { outputFolder: "playwright-report", open: "never" }]],
 
-  // ── Global setup / teardown ──────────────────────────────────────────────────
-  globalSetup: "./global-setup.ts",
-  globalTeardown: "./global-teardown.ts",
-
   // ── Shared settings for all tests ────────────────────────────────────────────
   use: {
     baseURL: BASE_URL,
@@ -66,8 +62,8 @@ export default defineConfig({
   // ── Output directory for test artifacts ──────────────────────────────────────
   outputDir: "test-results",
 
-  // ── Global timeout per test (90 s to allow cron scenarios) ───────────────────
-  timeout: 90_000,
+  // ── Global timeout per test (120 s to allow cron chain scenarios) ───────────
+  timeout: 120_000,
   expect: {
     timeout: 10_000,
   },

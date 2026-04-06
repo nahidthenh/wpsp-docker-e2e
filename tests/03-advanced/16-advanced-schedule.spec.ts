@@ -12,7 +12,7 @@
  */
 
 import { test, expect } from "../../fixtures/base-fixture";
-import { runWpCli, runWpCron, isPluginActive, deletePostsByTitlePrefix, dismissWelcomeGuide } from "../../utils/wp-helpers";
+import { runWpCli, runWpCron, deletePostsByTitlePrefix, dismissWelcomeGuide } from "../../utils/wp-helpers";
 
 const PREFIX = "E2E-AdvSched-";
 
@@ -30,7 +30,6 @@ test.describe("SchedulePress PRO – Advanced Schedule", () => {
   // ── Meta storage ─────────────────────────────────────────────────────────
 
   test("_wpscppro_advance_schedule meta can be set and read via WP-CLI", () => {
-    if (!isPluginActive("wp-scheduled-posts-pro")) return test.skip();
 
     const id = runWpCli(
       `post create --post_title="${PREFIX}Meta-RW" --post_status=draft --porcelain`
@@ -49,7 +48,6 @@ test.describe("SchedulePress PRO – Advanced Schedule", () => {
   });
 
   test("advance schedule meta survives a post update", () => {
-    if (!isPluginActive("wp-scheduled-posts-pro")) return test.skip();
 
     const id = runWpCli(
       `post create --post_title="${PREFIX}Meta-Persist" --post_status=draft --porcelain`
@@ -66,7 +64,6 @@ test.describe("SchedulePress PRO – Advanced Schedule", () => {
   });
 
   test("advance schedule meta can be deleted", () => {
-    if (!isPluginActive("wp-scheduled-posts-pro")) return test.skip();
 
     const id = runWpCli(
       `post create --post_title="${PREFIX}Meta-Delete" --post_status=draft --porcelain`

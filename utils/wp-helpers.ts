@@ -6,7 +6,7 @@
  */
 
 import { Page, expect } from "@playwright/test";
-import { execSync }      from "child_process";
+import { execSync } from "child_process";
 import { BLOCK_EDITOR, POSTS_LIST, SCHEDULE_PRESS } from "./selectors";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -20,17 +20,39 @@ export async function gotoAdminDashboard(page: Page): Promise<void> {
 }
 
 /** Navigate to the new post editor. */
+/** Navigate to the new post editor. */
+/**
+ * Dismiss Gutenberg Welcome Guide (multi-step modal)
+ */
 export async function dismissWelcomeGuide(page: Page): Promise<void> {
-  const closeBtn = page.locator(
-    'dialog[aria-label="Welcome to the block editor"] button[aria-label="Close"]'
-  );
-  if (await closeBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
-    await closeBtn.click();
-    await page.waitForSelector(
-      'dialog[aria-label="Welcome to the block editor"]',
-      { state: "hidden" }
-    );
+  const modal = page.locator('[role="dialog"][aria-label*="Welcome"]');
+
+  // যদি modal না থাকে → কিছুই করবো না
+  if (!(await modal.isVisible().catch(() => false))) return;
+
+  const nextBtn = modal.locator('button:has-text("Next")');
+  const getStartedBtn = modal.locator('button:has-text("Get started")');
+  const closeBtn = modal.locator('button[aria-label="Close"]');
+
+  // Stepগুলো যতক্ষণ "Next" আছে ততক্ষণ click করো
+  while (await nextBtn.isVisible().catch(() => false)) {
+    await nextBtn.click({ force: true });
+
+    // animation wait (Gutenberg UI একটু slow)
+    await page.waitForTimeout(300);
   }
+
+  // Last "Get started" click
+  if (await getStartedBtn.isVisible().catch(() => false)) {
+    await getStartedBtn.click({ force: true });
+  }
+  // fallback: Untill close button appire 
+  else if (await closeBtn.isVisible().catch(() => false)) {
+    await closeBtn.click({ force: true });
+  }
+
+  // untill close the modal wait
+  await modal.waitFor({ state: 'hidden' }).catch(() => { });
 }
 
 export async function gotoNewPost(page: Page): Promise<void> {
@@ -102,10 +124,10 @@ export async function schedulePostForDate(page: Page, date: Date): Promise<void>
   await datePickerTrigger.click();
 
   const pad = (n: number) => String(n).padStart(2, "0");
-  const year   = date.getUTCFullYear();
-  const month  = date.getUTCMonth() + 1;
-  const day    = date.getUTCDate();
-  const hour   = date.getUTCHours();
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+  const hour = date.getUTCHours();
   const minute = date.getUTCMinutes();
 
   const { datePicker } = BLOCK_EDITOR;
@@ -117,10 +139,10 @@ export async function schedulePostForDate(page: Page, date: Date): Promise<void>
     await page.keyboard.press("Tab");
   }
 
-  await fillDateField(datePicker.month,  pad(month));
-  await fillDateField(datePicker.day,    pad(day));
-  await fillDateField(datePicker.year,   String(year));
-  await fillDateField(datePicker.hour,   pad(hour));
+  await fillDateField(datePicker.month, pad(month));
+  await fillDateField(datePicker.day, pad(day));
+  await fillDateField(datePicker.year, String(year));
+  await fillDateField(datePicker.hour, pad(hour));
   await fillDateField(datePicker.minute, pad(minute));
 }
 
@@ -174,11 +196,11 @@ export async function postExistsWithStatus(
  * This works whether or not the `wpcli` service container is running.
  */
 export function runWpCli(subcommand: string): string {
-  const network  = process.env.DOCKER_NETWORK  ?? "wpsp-docker-e2e_wpsp_network";
-  const dbHost   = process.env.WORDPRESS_DB_HOST     ?? "db:3306";
-  const dbUser   = process.env.WORDPRESS_DB_USER     ?? "wordpress";
-  const dbPass   = process.env.WORDPRESS_DB_PASSWORD ?? "wordpress";
-  const dbName   = process.env.WORDPRESS_DB_NAME     ?? "wordpress";
+  const network = process.env.DOCKER_NETWORK ?? "wpsp-docker-e2e_wpsp_network";
+  const dbHost = process.env.WORDPRESS_DB_HOST ?? "db:3306";
+  const dbUser = process.env.WORDPRESS_DB_USER ?? "wordpress";
+  const dbPass = process.env.WORDPRESS_DB_PASSWORD ?? "wordpress";
+  const dbName = process.env.WORDPRESS_DB_NAME ?? "wordpress";
 
   const cmd = [
     "docker run --rm",
@@ -203,6 +225,11 @@ export function runWpCli(subcommand: string): string {
       `WP-CLI command failed:\n  CMD: ${cmd}\n  STDERR: ${error.stderr ?? ""}\n  STDOUT: ${error.stdout ?? ""}`
     );
   }
+}
+
+/** Block synchronously for N seconds (for cron-timing tests). */
+export function sleep(seconds: number): void {
+  execSync(`sleep ${seconds}`);
 }
 
 /** Trigger all due WP-Cron events. */
@@ -262,7 +289,7 @@ export function deletePostsByTitlePrefix(prefix: string): void {
  */
 export async function waitUntil(
   condition: () => Promise<boolean>,
-  timeoutMs  = 60_000,
+  timeoutMs = 60_000,
   intervalMs = 3_000,
   description = "condition"
 ): Promise<void> {

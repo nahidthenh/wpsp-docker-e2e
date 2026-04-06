@@ -44,16 +44,8 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
     await rememberMe.check();
   }
 
-  await Promise.all([
-    page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 30_000 }),
-    page.locator("#wp-submit").click(),
-  ]);
-
-  // Confirm we landed on the dashboard
-  if (!page.url().includes("wp-admin")) {
-    // One extra wait in case of a double-redirect (e.g. setup wizard)
-    await page.waitForURL("**/wp-admin/**", { timeout: 15_000 });
-  }
+  await page.locator("#wp-submit").click();
+  await page.waitForSelector("#wpadminbar", { timeout: 45_000 });
 
   if (!page.url().includes("wp-admin")) {
     await page.screenshot({ path: "test-results/global-setup-failure.png" });

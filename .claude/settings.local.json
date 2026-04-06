@@ -10,7 +10,8 @@
       "Bash(curl -s -b /tmp/wp_c.txt 'http://localhost:8080/wp-admin/admin.php?page=schedulepress' -o /tmp/sp_settings.html)",
       "Read(//tmp/**)",
       "Bash(curl -s -b /tmp/wp_c.txt 'http://localhost:8080/wp-admin/admin.php?page=schedulepress-calendar' -o /tmp/sp_calendar.html)",
-      "Bash(curl -s \"http://localhost:8080/wp-content/plugins/wp-scheduled-posts/includes/Admin/Settings/assets/js/admin.js?ver=1fd1b627287c07fea189\")"
+      "Bash(curl -s \"http://localhost:8080/wp-content/plugins/wp-scheduled-posts/includes/Admin/Settings/assets/js/admin.js?ver=1fd1b627287c07fea189\")",
+      "Bash(docker compose:*)"
     ]
   }
 }
