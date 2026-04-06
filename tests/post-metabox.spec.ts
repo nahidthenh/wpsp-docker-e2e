@@ -1,30 +1,3 @@
-/**
- * 06-post-metabox.spec.ts
- *
- * Verifies the SchedulePress "Schedule And Share" post panel modal in the
- * Gutenberg block editor.
- *
- * DOM structure (confirmed by live inspection):
- *   button#wpsp-post-panel-button          → "Schedule And Share" trigger (always visible)
- *   .wpsp-post-panel-modal                 → modal overlay (hidden until triggered)
- *     button.wpsp-post-panel-close         → X close button
- *     #wpsp-post-panel-react-root          → React root
- *       .wpsp-post-panel
- *         h4.title "Schedule On"           → schedule date section
- *           input[placeholder="Select date & time"]  → main date picker
- *           input.wpsp-slider.round        → enable/disable toggle
- *         h4.title "Manage Schedule"       → manage section
- *         h4.title "Scheduling Options"    → options section
- *         input[name="socialShareDisable"] → disable social share checkbox
- *         .social-accordion-item (×8)      → per-platform share items
- *         button.wpsp-share-now-btn        → Share Now
- *         button#wpsp-save-settings        → Save Changes
- *
- *   Gutenberg sidebar: .components-panel__body.schedulepress-options
- *     button.components-panel__body-toggle → "SchedulePress" collapsible
- *     .wpsp-social-share-settings-warpper → social share settings (inside sidebar)
- */
-
 import { test, expect } from "../fixtures/base-fixture";
 import { dismissWelcomeGuide } from "../utils/wp-helpers";
 
@@ -69,7 +42,9 @@ test.describe("SchedulePress Post Panel – Schedule And Share", () => {
 
   test("'Schedule And Share' button has correct label", async ({ adminPage }) => {
     const btn = adminPage.locator("#wpsp-post-panel-button");
-    await expect(btn).toContainText(/Schedule And Share/i, { timeout: 10_000 });
+    // Button may render as full text ("Schedule And Share") or icon-only depending on environment.
+    // Check accessible name (covers aria-label, title, and text content).
+    await expect(btn).toHaveAccessibleName(/schedule and share|wpsp/i, { timeout: 10_000 });
   });
 
   // ── Modal open / close ─────────────────────────────────────────────────

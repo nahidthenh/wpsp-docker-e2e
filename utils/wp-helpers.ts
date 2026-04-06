@@ -27,8 +27,13 @@ export async function gotoAdminDashboard(page: Page): Promise<void> {
 export async function dismissWelcomeGuide(page: Page): Promise<void> {
   const modal = page.locator('[role="dialog"][aria-label*="Welcome"]');
 
-  // যদি modal না থাকে → কিছুই করবো না
-  if (!(await modal.isVisible().catch(() => false))) return;
+  // Wait up to 5s for the Welcome Guide — Gutenberg renders it asynchronously
+  // after React initializes, so checking immediately after domcontentloaded misses it on CI.
+  try {
+    await modal.waitFor({ state: "visible", timeout: 5_000 });
+  } catch {
+    return; // No guide appeared — editor is already initialized without it
+  }
 
   const nextBtn = modal.locator('button:has-text("Next")');
   const getStartedBtn = modal.locator('button:has-text("Get started")');
