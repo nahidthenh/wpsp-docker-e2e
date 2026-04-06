@@ -97,10 +97,12 @@ wp rewrite flush --hard --path="${WP_PATH}" --allow-root
 wp option update admin_email_lifespan 999999999 --path="${WP_PATH}" --allow-root
 
 # ── Disable Gutenberg Welcome Guide for all existing users ───────────────────
-# Sets the `welcomeGuide` user-meta to false so the modal never appears in tests.
+# Gutenberg stores preferences in wp_persisted_preferences (JSON) under core/edit-post.
 echo "🚫 Disabling Gutenberg Welcome Guide for all users..."
 wp user list --field=ID --path="${WP_PATH}" --allow-root | while read -r uid; do
-  wp user meta update "$uid" welcomeGuide false --path="${WP_PATH}" --allow-root 2>/dev/null || true
+  wp user meta update "$uid" wp_persisted_preferences \
+    '{"core/edit-post":{"welcomeGuide":false},"core/edit-site":{"welcomeGuide":false}}' \
+    --path="${WP_PATH}" --allow-root 2>/dev/null || true
 done
 
 # ── Create a test author user ─────────────────────────────────────────────────
