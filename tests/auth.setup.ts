@@ -25,6 +25,8 @@ setup("authenticate as admin", async ({ page }) => {
   await userLoginField.waitFor({ state: "visible", timeout: 30_000 });
   await userLoginField.fill(process.env.WP_ADMIN_USER ?? "admin");
 
+  await page.waitForTimeout(5000);
+
   const userPassField = page.locator("#user_pass");
   await userPassField.waitFor({ state: "visible", timeout: 10_000 });
   await userPassField.fill(process.env.WP_ADMIN_PASS ?? "admin");
