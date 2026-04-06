@@ -15,8 +15,8 @@ export default defineConfig({
   fullyParallel: false,
   workers: process.env.CI ? 2 : 1,
 
-  // ── Retry strategy: 2 retries in CI, 0 locally ────────────────────────────
-  retries: process.env.CI ? 2 : 0,
+  // ── Retry strategy: 1 retries in CI, 0 locally ────────────────────────────
+  retries: process.env.CI ? 1 : 0,
 
   // ── Reporters ────────────────────────────────────────────────────────────────
   reporter: process.env.CI

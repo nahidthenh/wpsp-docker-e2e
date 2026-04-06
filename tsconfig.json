@@ -30,7 +30,7 @@
     "global-setup.ts",
     "global-teardown.ts",
     "playwright.config.ts"
-  ],
+, "tests/post-metabox.js"  ],
   "exclude": [
     "node_modules",
     "dist",

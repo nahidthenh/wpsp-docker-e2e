@@ -27,8 +27,8 @@ export WP_ADMIN_USER="${WP_ADMIN_USER:-admin}"
 export WP_ADMIN_PASS="${WP_ADMIN_PASS:-admin}"
 
 if [ -n "$PATTERN" ]; then
-  npx playwright test tests/auth.setup.ts --project=setup
-  npx playwright test $PATTERN --project=chromium --no-deps
+  npx playwright test tests/auth.setup.ts --project=setup --retries=0
+  npx playwright test $PATTERN --project=chromium --no-deps --retries=0
 else
-  npx playwright test
+  npx playwright test --retries=0
 fi
