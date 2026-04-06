@@ -28,13 +28,39 @@
 import { test, expect } from "../../fixtures/base-fixture";
 import { dismissWelcomeGuide } from "../../utils/wp-helpers";
 
+/** Wait for the block editor and the SchedulePress plugin button to be ready. */
+async function waitForEditorReady(adminPage: import("@playwright/test").Page): Promise<void> {
+  // Block editor toolbar is the reliable signal that Gutenberg is fully loaded
+  await adminPage.locator(".edit-post-header-toolbar, .editor-header__toolbar").waitFor({ state: "visible", timeout: 30_000 });
+  // Plugin button must be present before any test interaction
+  await adminPage.locator("#wpsp-post-panel-button").waitFor({ state: "visible", timeout: 20_000 });
+}
+
+/** Ensure the Gutenberg sidebar is open (needed for sidebar-dependent tests). */
+async function ensureSidebarOpen(adminPage: import("@playwright/test").Page): Promise<void> {
+  const sidebar = adminPage.locator(".interface-interface-skeleton__sidebar");
+  if (!(await sidebar.isVisible({ timeout: 3_000 }).catch(() => false))) {
+    const settingsBtn = adminPage.locator('button[aria-label="Settings"]').first();
+    if (await settingsBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await settingsBtn.click();
+      await sidebar.waitFor({ state: "visible", timeout: 5_000 });
+    }
+  }
+}
+
 test.describe("SchedulePress Post Panel – Schedule And Share", () => {
 
   test.beforeEach(async ({ adminPage }) => {
     await adminPage.goto("/wp-admin/post-new.php?post_type=post", { waitUntil: "domcontentloaded" });
-    await adminPage.waitForTimeout(2000);
 
+    // Dismiss the Welcome Guide before any other interaction (CI always shows it on fresh install)
     await dismissWelcomeGuide(adminPage);
+
+    // Wait for the editor and plugin to be fully ready instead of a fixed timeout
+    await waitForEditorReady(adminPage);
+
+    // Ensure the Gutenberg sidebar is open (required for sidebar-dependent tests)
+    await ensureSidebarOpen(adminPage);
   });
 
   // ── Trigger button ─────────────────────────────────────────────────────
