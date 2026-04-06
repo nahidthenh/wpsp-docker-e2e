@@ -11,8 +11,8 @@
  * as missed), then trigger cron and verify they publish.
  */
 
-import { test, expect } from "../../../fixtures/base-fixture";
-import { runWpCli, runWpCron, deletePostsByTitlePrefix } from "../../../utils/wp-helpers";
+import { test, expect } from "../../fixtures/base-fixture";
+import { runWpCli, runWpCron, deletePostsByTitlePrefix } from "../../utils/wp-helpers";
 
 const PREFIX = "E2E-Missed-";
 

@@ -14,8 +14,8 @@
  * All tests are independent and clean up after themselves.
  */
 
-import { test, expect } from "../../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../../utils/selectors";
+import { test, expect } from "../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../utils/selectors";
 import { runWpCli } from "../../../utils/wp-helpers";
 
 const BASE_URL = process.env.WP_BASE_URL ?? "http://localhost:8080";

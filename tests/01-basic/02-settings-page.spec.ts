@@ -17,8 +17,8 @@
  *   layouts_instagram, layouts_medium, layouts_threads, layouts_google_business
  */
 
-import { test, expect } from "../../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../../utils/selectors";
+import { test, expect } from "../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../utils/selectors";
 
 test.describe("SchedulePress Settings Page", () => {
 

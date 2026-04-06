@@ -10,9 +10,9 @@
  * the Scheduling Hub nav item.
  */
 
-import { test, expect } from "../../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../../utils/selectors";
-import { runWpCli } from "../../../utils/wp-helpers";
+import { test, expect } from "../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../utils/selectors";
+import { runWpCli } from "../../utils/wp-helpers";
 
 const HUB_NAV = 'li.wprf-tab-nav-item[data-key="layout_scheduling_hub"]';
 const ADVANCED_NAV = 'li.wprf-tab-nav-item[data-key="layout_advance_schedule"]';

@@ -11,8 +11,8 @@
  * Advanced Schedule tab inside the Scheduling Hub.
  */
 
-import { test, expect } from "../../../fixtures/base-fixture";
-import { runWpCli, runWpCron, deletePostsByTitlePrefix, dismissWelcomeGuide } from "../../../utils/wp-helpers";
+import { test, expect } from "../../fixtures/base-fixture";
+import { runWpCli, runWpCron, deletePostsByTitlePrefix, dismissWelcomeGuide } from "../../utils/wp-helpers";
 
 const PREFIX = "E2E-AdvSched-";
 

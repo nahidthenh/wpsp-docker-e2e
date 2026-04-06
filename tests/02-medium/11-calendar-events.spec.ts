@@ -10,10 +10,10 @@
  *   .fc-event-title                            → event title text
  */
 
-import { test, expect } from "../../../fixtures/base-fixture";
+import { test, expect } from "../../fixtures/base-fixture";
 import { Page } from "@playwright/test";
-import { SCHEDULE_PRESS } from "../../../utils/selectors";
-import { runWpCli } from "../../../utils/wp-helpers";
+import { SCHEDULE_PRESS } from "../../utils/selectors";
+import { runWpCli } from "../../utils/wp-helpers";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

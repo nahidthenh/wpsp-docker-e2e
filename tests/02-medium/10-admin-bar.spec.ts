@@ -14,9 +14,9 @@
  * Count shows "(0)" when no posts are scheduled.
  */
 
-import { test, expect } from "../../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../../utils/selectors";
-import { runWpCli } from "../../../utils/wp-helpers";
+import { test, expect } from "../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../utils/selectors";
+import { runWpCli } from "../../utils/wp-helpers";
 
 const ADMIN_BAR_ITEM = "#wp-admin-bar-wpscp";
 const ADMIN_BAR_LABEL = "#wp-admin-bar-wpscp .ab-item";

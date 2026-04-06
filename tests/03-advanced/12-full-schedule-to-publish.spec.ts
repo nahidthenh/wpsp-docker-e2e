@@ -10,9 +10,9 @@
  * All post creation uses WP-CLI; cron is triggered via `wp cron event run`.
  */
 
-import { test, expect } from "../../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../../utils/selectors";
-import { runWpCli, runWpCron, deletePostsByTitlePrefix } from "../../../utils/wp-helpers";
+import { test, expect } from "../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../utils/selectors";
+import { runWpCli, runWpCron, deletePostsByTitlePrefix } from "../../utils/wp-helpers";
 
 const PREFIX = "E2E-Schedule-";
 

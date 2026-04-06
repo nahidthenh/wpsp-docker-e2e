@@ -25,8 +25,8 @@
  *     .wpsp-social-share-settings-warpper → social share settings (inside sidebar)
  */
 
-import { test, expect } from "../../../fixtures/base-fixture";
-import { dismissWelcomeGuide } from "../../../utils/wp-helpers";
+import { test, expect } from "../../fixtures/base-fixture";
+import { dismissWelcomeGuide } from "../../utils/wp-helpers";
 
 /** Wait for Gutenberg toolbar and the plugin button — replaces fixed timeouts. */
 async function waitForEditorReady(adminPage: import("@playwright/test").Page): Promise<void> {

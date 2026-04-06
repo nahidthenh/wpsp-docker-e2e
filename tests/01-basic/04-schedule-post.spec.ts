@@ -12,8 +12,8 @@
  * block editor UI and avoids flakiness from React rendering delays.
  */
 
-import { test, expect } from "../../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../../utils/selectors";
+import { test, expect } from "../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../utils/selectors";
 
 const BASE_URL = process.env.WP_BASE_URL ?? "http://localhost:8080";
 
