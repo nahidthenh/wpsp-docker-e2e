@@ -41,10 +41,10 @@ test.describe("SchedulePress Post Panel – Schedule And Share", () => {
   });
 
   test("'Schedule And Share' button has correct label", async ({ adminPage }) => {
-    const btn = adminPage.locator("#wpsp-post-panel-button");
-    // Button may render as full text ("Schedule And Share") or icon-only depending on environment.
-    // Check accessible name (covers aria-label, title, and text content).
-    await expect(btn).toHaveAccessibleName(/schedule and share|wpsp/i, { timeout: 10_000 });
+    // Expand the SchedulePress sidebar panel first — this triggers full React initialization,
+    // after which the toolbar "Schedule And Share" button renders with its text label.
+    await adminPage.getByRole("button", { name: "SchedulePress", exact: true }).click();
+    await expect(adminPage.getByRole("button", { name: "Schedule And Share" })).toBeVisible({ timeout: 10_000 });
   });
 
   // ── Modal open / close ─────────────────────────────────────────────────
