@@ -26,6 +26,7 @@
  */
 
 import { test, expect } from "../../fixtures/base-fixture";
+import { dismissWelcomeGuide } from "../../utils/wp-helpers";
 
 test.describe("SchedulePress Post Panel – Schedule And Share", () => {
 
@@ -33,14 +34,7 @@ test.describe("SchedulePress Post Panel – Schedule And Share", () => {
     await adminPage.goto("/wp-admin/post-new.php?post_type=post", { waitUntil: "domcontentloaded" });
     await adminPage.waitForTimeout(2000);
 
-    // Dismiss Gutenberg "Welcome to the block editor" guide if it appears
-    const welcomeClose = adminPage.locator(
-      'dialog[aria-label="Welcome to the block editor"] button[aria-label="Close"]'
-    );
-    if (await welcomeClose.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await welcomeClose.click();
-      await adminPage.waitForSelector('dialog[aria-label="Welcome to the block editor"]', { state: "hidden" });
-    }
+    await dismissWelcomeGuide(adminPage);
   });
 
   // ── Trigger button ─────────────────────────────────────────────────────

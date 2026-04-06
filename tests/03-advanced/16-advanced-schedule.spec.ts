@@ -12,7 +12,7 @@
  */
 
 import { test, expect } from "../../fixtures/base-fixture";
-import { runWpCli, runWpCron, isPluginActive, deletePostsByTitlePrefix } from "../../utils/wp-helpers";
+import { runWpCli, runWpCron, isPluginActive, deletePostsByTitlePrefix, dismissWelcomeGuide } from "../../utils/wp-helpers";
 
 const PREFIX = "E2E-AdvSched-";
 
@@ -129,16 +129,20 @@ test.describe("SchedulePress PRO – Advanced Schedule", () => {
 
   // ── Gutenberg sidebar ─────────────────────────────────────────────────────
 
-  test("SchedulePress sidebar panel is visible in the block editor", async ({ adminPage }) => {
-    await adminPage.goto("/wp-admin/post-new.php?post_type=post", { waitUntil: "domcontentloaded" });
-    await adminPage.waitForTimeout(2000);
-    const panel = adminPage.locator(".components-panel__body.schedulepress-options");
-    await expect(panel).toBeVisible({ timeout: 15_000 });
-  });
+  test.describe("Block editor integration", () => {
+    test.beforeEach(async ({ adminPage }) => {
+      await adminPage.goto("/wp-admin/post-new.php?post_type=post", { waitUntil: "domcontentloaded" });
+      await adminPage.waitForTimeout(2000);
+      await dismissWelcomeGuide(adminPage);
+    });
 
-  test("SchedulePress 'Schedule And Share' button is present in block editor", async ({ adminPage }) => {
-    await adminPage.goto("/wp-admin/post-new.php?post_type=post", { waitUntil: "domcontentloaded" });
-    await adminPage.waitForTimeout(2000);
-    await expect(adminPage.locator("#wpsp-post-panel-button")).toBeVisible({ timeout: 10_000 });
+    test("SchedulePress sidebar panel is visible in the block editor", async ({ adminPage }) => {
+      const panel = adminPage.locator(".components-panel__body.schedulepress-options");
+      await expect(panel).toBeVisible({ timeout: 15_000 });
+    });
+
+    test("SchedulePress 'Schedule And Share' button is present in block editor", async ({ adminPage }) => {
+      await expect(adminPage.locator("#wpsp-post-panel-button")).toBeVisible({ timeout: 10_000 });
+    });
   });
 });

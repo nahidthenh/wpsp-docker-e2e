@@ -20,13 +20,22 @@ export async function gotoAdminDashboard(page: Page): Promise<void> {
 }
 
 /** Navigate to the new post editor. */
+export async function dismissWelcomeGuide(page: Page): Promise<void> {
+  const closeBtn = page.locator(
+    'dialog[aria-label="Welcome to the block editor"] button[aria-label="Close"]'
+  );
+  if (await closeBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    await closeBtn.click();
+    await page.waitForSelector(
+      'dialog[aria-label="Welcome to the block editor"]',
+      { state: "hidden" }
+    );
+  }
+}
+
 export async function gotoNewPost(page: Page): Promise<void> {
   await page.goto("/wp-admin/post-new.php", { waitUntil: "domcontentloaded" });
-  // Dismiss any "Welcome to the block editor" dialog
-  const welcomeDialog = page.locator('[aria-label="Close dialog"]');
-  if (await welcomeDialog.isVisible({ timeout: 3_000 }).catch(() => false)) {
-    await welcomeDialog.click();
-  }
+  await dismissWelcomeGuide(page);
   await expect(
     page.locator(BLOCK_EDITOR.titleInput).first()
   ).toBeVisible({ timeout: 15_000 });
