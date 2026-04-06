@@ -113,7 +113,13 @@ jobs:
           PAGES_URL:                  "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
         run: |
           PATTERN="${{ github.event.inputs.test_pattern }}"
-          npx playwright test ${PATTERN}
+          if [ -n "$PATTERN" ]; then
+            # Always run auth setup first, then run specified tests without re-running setup
+            npx playwright test tests/auth.setup.ts --project=setup
+            npx playwright test $PATTERN --project=chromium --skip-dependencies
+          else
+            npx playwright test
+          fi
 
       - name: Upload Playwright HTML report
         uses: actions/upload-artifact@v4
