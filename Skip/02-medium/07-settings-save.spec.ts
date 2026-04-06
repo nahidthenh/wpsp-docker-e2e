@@ -14,8 +14,8 @@
  * Toggle pattern: .wprf-control-wrapper[class*="wprf-name-{field}"] input[type="checkbox"]
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../utils/selectors";
+import { test, expect } from "../../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../../utils/selectors";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -180,7 +180,7 @@ test.describe("SchedulePress Settings – Save & Persist (Email Notify Tab)", ()
 // ─────────────────────────────────────────────────────────────────────────────
 
 test.describe("SchedulePress Settings – Save & Persist (Social Templates Tab)", () => {
-  const NAV          = 'li.wprf-tab-nav-item[data-key="layout_social_template"]';
+  const NAV = 'li.wprf-tab-nav-item[data-key="layout_social_template"]';
   const FACEBOOK_NAV = 'li.wprf-tab-nav-item[data-key="layouts_facebook"]';
 
   test.beforeEach(async ({ adminPage }) => {

@@ -12,8 +12,8 @@
  * block editor UI and avoids flakiness from React rendering delays.
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../utils/selectors";
+import { test, expect } from "../../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../../utils/selectors";
 
 const BASE_URL = process.env.WP_BASE_URL ?? "http://localhost:8080";
 
@@ -33,9 +33,9 @@ function futureGmt(offsetHours = 2): string {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 test.describe("Schedule a Post", () => {
-  const POST_TITLE   = `E2E Scheduled – ${Date.now()}`;
+  const POST_TITLE = `E2E Scheduled – ${Date.now()}`;
   const POST_CONTENT = "Automated E2E test post created by Playwright.";
-  let   postId: number;
+  let postId: number;
 
   // Create the post once for the whole suite
   test.beforeAll(({ wpCli }) => {

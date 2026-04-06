@@ -10,9 +10,9 @@
  * All post creation uses WP-CLI; cron is triggered via `wp cron event run`.
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../utils/selectors";
-import { runWpCli, runWpCron, deletePostsByTitlePrefix } from "../../utils/wp-helpers";
+import { test, expect } from "../../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../../utils/selectors";
+import { runWpCli, runWpCron, deletePostsByTitlePrefix } from "../../../utils/wp-helpers";
 
 const PREFIX = "E2E-Schedule-";
 
@@ -204,8 +204,8 @@ test.describe("SchedulePress – Full Schedule-to-Publish Flow", () => {
     // Verify the stored date was updated (WP may auto-transition status differently per version)
     const storedDate = runWpCli(`post get ${id} --field=post_date`);
     // post_date should be close to futureDate (within 5 seconds tolerance)
-    const storedMs  = new Date(storedDate.trim().replace(" ", "T") + "Z").getTime();
-    const futureMs  = new Date(futureDate.replace(" ", "T") + "Z").getTime();
+    const storedMs = new Date(storedDate.trim().replace(" ", "T") + "Z").getTime();
+    const futureMs = new Date(futureDate.replace(" ", "T") + "Z").getTime();
     expect(Math.abs(storedMs - futureMs)).toBeLessThan(5000);
     runWpCli(`post delete ${id} --force`);
   });

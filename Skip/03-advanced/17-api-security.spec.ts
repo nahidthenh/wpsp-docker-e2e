@@ -15,8 +15,8 @@
  * create a subscriber here if needed.
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
-import { runWpCli, deletePostsByTitlePrefix } from "../../utils/wp-helpers";
+import { test, expect } from "../../../fixtures/base-fixture";
+import { runWpCli, deletePostsByTitlePrefix } from "../../../utils/wp-helpers";
 
 const PREFIX = "E2E-Security-";
 

@@ -11,8 +11,8 @@
  *  - Calendar slug    : schedulepress-calendar
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../utils/selectors";
+import { test, expect } from "../../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../../utils/selectors";
 
 test.describe("Plugin Activation", () => {
 

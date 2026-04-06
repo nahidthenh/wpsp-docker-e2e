@@ -7,6 +7,14 @@ on:
         description: "Test file pattern (e.g. tests/03-advanced/*.spec.ts). Leave blank to run all."
         required: false
         default: ""
+      free_branch:
+        description: "Branch for wp-scheduled-posts (free). Leave blank for default branch."
+        required: false
+        default: ""
+      pro_branch:
+        description: "Branch for wp-scheduled-posts-pro (PRO). Leave blank for default branch."
+        required: false
+        default: ""
 
 concurrency:
   group: e2e-${{ github.ref }}
@@ -39,6 +47,7 @@ jobs:
         with:
           repository: WPDevelopers/wp-scheduled-posts
           path: plugin-free
+          ref: ${{ github.event.inputs.free_branch || '' }}
           token: ${{ secrets.PLUGIN_REPO_TOKEN || github.token }}
         continue-on-error: true
 
@@ -47,6 +56,7 @@ jobs:
         with:
           repository: WPDevelopers/wp-scheduled-posts-pro
           path: plugin-pro
+          ref: ${{ github.event.inputs.pro_branch || '' }}
           token: ${{ secrets.PLUGIN_REPO_TOKEN || github.token }}
         continue-on-error: true
 

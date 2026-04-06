@@ -11,8 +11,8 @@
  * Advanced Schedule tab inside the Scheduling Hub.
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
-import { runWpCli, runWpCron, deletePostsByTitlePrefix, dismissWelcomeGuide } from "../../utils/wp-helpers";
+import { test, expect } from "../../../fixtures/base-fixture";
+import { runWpCli, runWpCron, deletePostsByTitlePrefix, dismissWelcomeGuide } from "../../../utils/wp-helpers";
 
 const PREFIX = "E2E-AdvSched-";
 
@@ -88,7 +88,7 @@ test.describe("SchedulePress PRO – Advanced Schedule", () => {
 
   // PRO registers per-post cron events via its save_post hook — setting meta
   // directly via WP-CLI does not trigger PRO's scheduling handler.
-  test.skip("post transitions to publish on first advance schedule date (cron) — requires PRO UI save flow", () => {});
+  test.skip("post transitions to publish on first advance schedule date (cron) — requires PRO UI save flow", () => { });
 
   // ── Settings UI ───────────────────────────────────────────────────────────
 

@@ -14,14 +14,14 @@
  * Count shows "(0)" when no posts are scheduled.
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../utils/selectors";
-import { runWpCli } from "../../utils/wp-helpers";
+import { test, expect } from "../../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../../utils/selectors";
+import { runWpCli } from "../../../utils/wp-helpers";
 
-const ADMIN_BAR_ITEM  = "#wp-admin-bar-wpscp";
+const ADMIN_BAR_ITEM = "#wp-admin-bar-wpscp";
 const ADMIN_BAR_LABEL = "#wp-admin-bar-wpscp .ab-item";
-const ADMIN_BAR_SUB   = "#wp-admin-bar-wpscp-default";
-const GENERAL_NAV     = 'li.wprf-tab-nav-item[data-key="layout_general"]';
+const ADMIN_BAR_SUB = "#wp-admin-bar-wpscp-default";
+const GENERAL_NAV = 'li.wprf-tab-nav-item[data-key="layout_general"]';
 
 /** Click the first visible Save Changes button on the settings page. */
 async function saveSettingsPage(adminPage: import("@playwright/test").Page) {

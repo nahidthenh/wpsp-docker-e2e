@@ -17,8 +17,8 @@
  *                                           button.fc-prev-button, button.fc-today-button
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../utils/selectors";
+import { test, expect } from "../../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../../utils/selectors";
 
 test.describe("SchedulePress Calendar", () => {
 

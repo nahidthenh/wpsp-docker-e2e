@@ -10,10 +10,10 @@
  *   .fc-event-title                            → event title text
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
+import { test, expect } from "../../../fixtures/base-fixture";
 import { Page } from "@playwright/test";
-import { SCHEDULE_PRESS } from "../../utils/selectors";
-import { runWpCli } from "../../utils/wp-helpers";
+import { SCHEDULE_PRESS } from "../../../utils/selectors";
+import { runWpCli } from "../../../utils/wp-helpers";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ function wpDateStr(daysFromNow: number): string {
 async function waitForCalendar(page: Page): Promise<void> {
   await page.locator(".fc").waitFor({ state: "visible", timeout: 15_000 });
   await page.locator(".calender-selected-month").waitFor({ state: "visible", timeout: 10_000 });
-  await page.waitForLoadState("networkidle").catch(() => {});
+  await page.waitForLoadState("networkidle").catch(() => { });
   await page.waitForTimeout(1_000);
 }
 

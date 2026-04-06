@@ -10,14 +10,14 @@
  * the Scheduling Hub nav item.
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../utils/selectors";
-import { runWpCli } from "../../utils/wp-helpers";
+import { test, expect } from "../../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../../utils/selectors";
+import { runWpCli } from "../../../utils/wp-helpers";
 
-const HUB_NAV           = 'li.wprf-tab-nav-item[data-key="layout_scheduling_hub"]';
-const ADVANCED_NAV      = 'li.wprf-tab-nav-item[data-key="layout_advance_schedule"]';
-const MANAGE_NAV        = 'li.wprf-tab-nav-item[data-key="manage-schedule"]';
-const MISSED_NAV        = 'li.wprf-tab-nav-item[data-key="layout_missed_schedule"]';
+const HUB_NAV = 'li.wprf-tab-nav-item[data-key="layout_scheduling_hub"]';
+const ADVANCED_NAV = 'li.wprf-tab-nav-item[data-key="layout_advance_schedule"]';
+const MANAGE_NAV = 'li.wprf-tab-nav-item[data-key="manage-schedule"]';
+const MISSED_NAV = 'li.wprf-tab-nav-item[data-key="layout_missed_schedule"]';
 
 test.describe("SchedulePress – Scheduling Hub Navigation", () => {
 

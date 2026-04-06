@@ -14,8 +14,8 @@
  *   3. Second cron run executes those hooks → changes post status
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
-import { runWpCli, runWpCron, sleep, deletePostsByTitlePrefix } from "../../utils/wp-helpers";
+import { test, expect } from "../../../fixtures/base-fixture";
+import { runWpCli, runWpCron, sleep, deletePostsByTitlePrefix } from "../../../utils/wp-helpers";
 
 const PREFIX = "E2E-RepubUnpub-";
 

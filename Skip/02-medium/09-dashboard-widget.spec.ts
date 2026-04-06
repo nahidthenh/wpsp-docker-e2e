@@ -15,11 +15,11 @@
  * Tests that toggle the widget setting in General tab will save + restore state.
  */
 
-import { test, expect } from "../../fixtures/base-fixture";
-import { SCHEDULE_PRESS } from "../../utils/selectors";
-import { runWpCli } from "../../utils/wp-helpers";
+import { test, expect } from "../../../fixtures/base-fixture";
+import { SCHEDULE_PRESS } from "../../../utils/selectors";
+import { runWpCli } from "../../../utils/wp-helpers";
 
-const WIDGET_ID  = "#wp_scp_dashboard_widget";
+const WIDGET_ID = "#wp_scp_dashboard_widget";
 const GENERAL_NAV = 'li.wprf-tab-nav-item[data-key="layout_general"]';
 
 /** Click the first visible Save Changes button on the settings page. */
