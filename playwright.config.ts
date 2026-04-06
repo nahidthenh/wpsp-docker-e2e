@@ -70,11 +70,13 @@ export default defineConfig({
 
   // ── Projects / browsers ──────────────────────────────────────────────────────
   projects: [
-    // Setup project: performs login and saves auth state
+    // Setup project: performs login and saves auth state.
+    // storageState is explicitly unset so Playwright does not try to load
+    // the auth file before it has been created by this very project.
     {
       name: "setup",
       testMatch: /.*\.setup\.ts/,
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], storageState: undefined },
     },
 
     // Main test suite — depends on setup
