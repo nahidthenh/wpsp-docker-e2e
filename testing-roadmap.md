@@ -7,7 +7,7 @@
 | 01-Basic | 5 | 131 | ✅ Complete |
 | 02-Medium | 6 | 85 pass / 1 skip | ✅ Complete |
 | 03-Advanced | 5 of 6 | ~50 implemented | ✅ Mostly complete |
-| 04-New | 3 planned | ~20 planned | 🔲 Not started |
+| 04-New | 3 planned | ~20 planned | 🔄 In progress |
 | **Total** | **16** | **~286** | |
 
 ---
@@ -200,7 +200,7 @@
 
 | Spec | Tests | Priority | What it proves |
 |---|---|---|---|
-| `18-user-roles.spec.ts` | ~8 | 🔴 High | Role-based access to scheduling, calendar, and social options |
+| `18-user-roles.spec.ts` | 11 | ✅ Done | Role-based access to scheduling, calendar, and social options |
 | `19-timezone.spec.ts` | ~5 | 🔴 High | Posts publish at correct UTC time with offset and location-based timezone |
 | `20-post-type-scheduling.spec.ts` | ~6 | 🟡 Medium | Scheduling works for post/page/custom post types per settings |
 
@@ -281,7 +281,7 @@
 ❌ Phase 15:  15-social-share-queue        Advanced — SKIPPED (requires OAuth)
 ✅ Phase 16:  16-advanced-schedule         Advanced — PRO multi-date schedule meta + Gutenberg
 ✅ Phase 17:  17-api-security              Advanced — REST auth, role boundaries, nonce protection
-🔲 Phase 18:  18-user-roles               New — role-based scheduling + calendar access
+✅ Phase 18:  18-user-roles               New — role-based scheduling + calendar access
 🔲 Phase 19:  19-timezone                 New — UTC offset and location-based scheduling accuracy
 🔲 Phase 20:  20-post-type-scheduling     New — post/page/custom type scheduling per settings
 ```
