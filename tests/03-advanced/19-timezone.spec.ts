@@ -1,22 +1,13 @@
 /**
  * 19-timezone.spec.ts
  *
- * Tier 03 — Advanced: Timezone handling for SchedulePress scheduling.
- *
- * WordPress stores two timestamps per post:
- *   post_date     → the LOCAL time (respects WordPress gmt_offset / timezone_string)
- *   post_date_gmt → the UTC time (used by wp-cron to decide when to fire)
- *
- * These tests verify:
- *   1. UTC+0 baseline — post_date_gmt equals post_date when gmt_offset = 0
- *   2. UTC+6 (positive offset) — local time is correctly converted to UTC
- *   3. UTC-5 (negative offset) — negative offset conversion is handled correctly
- *   4. Cron fires at the correct UTC time regardless of WordPress timezone setting
- *   5. Named timezone (e.g. "America/New_York") is handled the same as numeric offset
- *   6. After all tests, the original UTC+0 offset is restored and scheduling still works
- *
- * All tests save and restore the original gmt_offset so they do not bleed
- * timezone state into other spec files.
+ * Tests that SchedulePress scheduling is accurate across different WordPress timezone settings.
+ * - UTC+0 (baseline): post_date_gmt matches post_date exactly
+ * - UTC+6 (positive offset): local time is correctly converted to UTC for cron
+ * - UTC-5 (negative offset): negative offset conversion works correctly
+ * - Cron fires at the right UTC time regardless of the WordPress timezone setting
+ * - Named timezone (e.g. America/New_York) behaves the same as a numeric offset
+ * - Original timezone is always restored after each test so other specs are not affected
  *
  * Key insight: WP-CLI --post_date accepts LOCAL time. WordPress converts it to
  * post_date_gmt using the current gmt_offset. Cron fires when post_date_gmt <= now().

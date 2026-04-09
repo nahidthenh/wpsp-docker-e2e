@@ -1,18 +1,12 @@
 /**
  * 17-api-security.spec.ts
  *
- * Tier 03 — Advanced: REST API authorisation & permission boundaries.
- *
- * Verifies:
- *  - Unauthenticated requests cannot read scheduled/draft posts
- *  - Admin can read and write scheduling meta via REST
- *  - Subscriber role cannot edit posts or update settings
- *  - Nonce-protected AJAX endpoints reject forged nonces
- *  - WPSP settings REST endpoint requires authentication
- *
- * Uses the `adminPage` fixture (logged-in admin) and plain `page` (unauthenticated).
- * The subscriber user is created by wp-setup.sh (testauthor/author role) — we also
- * create a subscriber here if needed.
+ * Tests REST API authentication and permission boundaries.
+ * - Unauthenticated requests cannot read scheduled or draft posts (returns 401/403/404)
+ * - Admin can read and write scheduling meta via the REST API
+ * - Subscriber cannot edit posts or update SchedulePress settings via REST
+ * - AJAX endpoints with forged nonces are rejected
+ * - WPSP settings REST endpoint requires authentication
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

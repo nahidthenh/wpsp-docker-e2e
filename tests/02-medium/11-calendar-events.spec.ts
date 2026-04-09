@@ -1,13 +1,13 @@
 /**
  * 11-calendar-events.spec.ts
  *
- * Verifies that scheduled posts appear as events on the SchedulePress calendar,
- * and that calendar event interactions work correctly.
- *
- * FullCalendar event selectors (WPSP uses FullCalendar v6 day-grid):
- *   .fc-daygrid-day[data-date="YYYY-MM-DD"]   → the day cell
- *   .fc-event                                  → any event dot / bar
- *   .fc-event-title                            → event title text
+ * Checks that scheduled posts appear correctly on the SchedulePress calendar.
+ * - Scheduled post appears as a FullCalendar event with the correct title
+ * - Event lands in the correct day cell on the grid
+ * - Two posts on the same day both show as separate events
+ * - Navigating to next month shows an event scheduled there
+ * - Deleting a post removes it from the calendar
+ * - Calendar grid has 28+ day cells and 7 weekday column headers
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

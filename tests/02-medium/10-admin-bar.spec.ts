@@ -1,17 +1,11 @@
 /**
  * 10-admin-bar.spec.ts
  *
- * Verifies the SchedulePress "Scheduled Posts" item in the WordPress admin bar.
- *
- * DOM structure (confirmed by live inspection):
- *   #wp-admin-bar-wpscp.menupop           → top-level admin bar item
- *     .ab-item.ab-empty-item              → "Scheduled Posts (N)" label
- *     .ab-sub-wrapper
- *       #wp-admin-bar-wpscp-default       → sub-menu
- *         #wp-admin-bar-wpscp_1           → pagination / "Powered By SchedulePress"
- *
- * The admin bar is visible on both frontend and /wp-admin/ pages when logged in.
- * Count shows "(0)" when no posts are scheduled.
+ * Checks the "Scheduled Posts" item in the WordPress admin bar.
+ * - Item is present on /wp-admin/ and on the frontend (sitewide admin bar)
+ * - Label shows "Scheduled Posts (N)" with a count matching WP-CLI output
+ * - Count increments by 1 after a new post is scheduled
+ * - Disabling the Admin Bar toggle in Settings removes the item; re-enabling restores it
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

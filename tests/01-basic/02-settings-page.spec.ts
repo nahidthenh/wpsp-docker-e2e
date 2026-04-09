@@ -1,20 +1,13 @@
 /**
  * 02-settings-page.spec.ts
  *
- * Verifies the SchedulePress Settings page (admin.php?page=schedulepress).
- *
- * Left-nav structure (confirmed from live DOM — li.wprf-tab-nav-item[data-key]):
- *   data-key="layout_general"          → General tab
- *   data-key="layout_calendar"         → Calendar tab
- *   data-key="layout_email_notify"     → Email Notify tab
- *   data-key="layout_social_profile"   → Social Profile tab
- *   data-key="layout_social_template"  → Social Templates tab
- *   data-key="layout_scheduling_hub"   → Scheduling Hub tab (PRO)
- *   data-key="layout_license"          → License tab (PRO)
- *
- * Social Templates sub-tabs (data-key="layouts_*"):
- *   layouts_facebook, layouts_twitter, layouts_linkedin, layouts_pinterest,
- *   layouts_instagram, layouts_medium, layouts_threads, layouts_google_business
+ * Checks the SchedulePress Settings page loads and all major sections are present.
+ * - Page returns 200, no PHP errors, wp-admin chrome renders
+ * - General tab: Dashboard Widget, Admin Bar, Post Types, Email Notify toggles
+ * - Social Profile tab: all 8 platform cards with Add New buttons
+ * - Email Notify tab: Under Review and Scheduled notify toggles
+ * - Social Templates tab: all 8 platform sub-tabs with template input fields
+ * - PRO tabs: Scheduling Hub, License, Manage Schedule visible
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

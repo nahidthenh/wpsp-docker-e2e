@@ -1,14 +1,10 @@
 /**
  * 16-advanced-schedule.spec.ts
  *
- * Tier 03 — Advanced: PRO multi-date "Advance Schedule" feature.
- *
- * SchedulePress PRO stores an advance schedule as JSON in the post meta key:
- *   _wpscppro_advance_schedule  →  JSON array of { date, status } objects
- *
- * UI lives in the Gutenberg sidebar under the SchedulePress panel.
- * This file tests meta storage via WP-CLI and the settings UI for the
- * Advanced Schedule tab inside the Scheduling Hub.
+ * Tests the PRO "Advance Schedule" feature (multi-date scheduling).
+ * - The _wpscppro_advance_schedule meta key accepts a JSON array of dates via WP-CLI
+ * - Each scheduled date triggers the correct status change after cron runs
+ * - Advanced Schedule tab in Scheduling Hub renders with at least one settings field
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

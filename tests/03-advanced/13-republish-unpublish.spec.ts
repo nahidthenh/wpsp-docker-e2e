@@ -1,17 +1,10 @@
 /**
  * 13-republish-unpublish.spec.ts
  *
- * Tier 03 — Advanced: PRO republish / unpublish cycle.
- *
- * SchedulePress PRO stores:
- *   _wpscp_schedule_republish_date  → date to re-publish a draft back to publish
- *   _wpscp_schedule_draft_date      → date to move a published post back to draft
- *
- * Cron flow (two-step):
- *   1. wp post update fires save_post → PRO schedules `wpsp_pro_update_post` cron
- *   2. First cron run executes `wpsp_pro_update_post` → reads meta → schedules
- *      `wpscp_pro_schedule_republish` / `wpscp_pro_schedule_unpublish`
- *   3. Second cron run executes those hooks → changes post status
+ * Tests the PRO republish and unpublish scheduling cycle.
+ * - Setting an unpublish date moves a published post back to draft after cron runs
+ * - Setting a republish date moves a draft post back to published after cron runs
+ * - Meta fields (_wpscp_schedule_draft_date, _wpscp_schedule_republish_date) are writable
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

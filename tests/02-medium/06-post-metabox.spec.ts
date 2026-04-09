@@ -1,28 +1,13 @@
 /**
  * 06-post-metabox.spec.ts
  *
- * Verifies the SchedulePress "Schedule And Share" post panel modal in the
- * Gutenberg block editor.
- *
- * DOM structure (confirmed by live inspection):
- *   button#wpsp-post-panel-button          → "Schedule And Share" trigger (always visible)
- *   .wpsp-post-panel-modal                 → modal overlay (hidden until triggered)
- *     button.wpsp-post-panel-close         → X close button
- *     #wpsp-post-panel-react-root          → React root
- *       .wpsp-post-panel
- *         h4.title "Schedule On"           → schedule date section
- *           input[placeholder="Select date & time"]  → main date picker
- *           input.wpsp-slider.round        → enable/disable toggle
- *         h4.title "Manage Schedule"       → manage section
- *         h4.title "Scheduling Options"    → options section
- *         input[name="socialShareDisable"] → disable social share checkbox
- *         .social-accordion-item (×8)      → per-platform share items
- *         button.wpsp-share-now-btn        → Share Now
- *         button#wpsp-save-settings        → Save Changes
- *
- *   Gutenberg sidebar: .components-panel__body.schedulepress-options
- *     button.components-panel__body-toggle → "SchedulePress" collapsible
- *     .wpsp-social-share-settings-warpper → social share settings (inside sidebar)
+ * Checks the SchedulePress "Schedule And Share" panel inside the Gutenberg editor.
+ * - "Schedule And Share" button is visible and has the correct label
+ * - Clicking it opens the modal; the X button closes it
+ * - Modal contains Schedule On, Scheduling Options sections and date picker
+ * - Social share controls: Disable checkbox, 8 platform accordion items
+ * - Save Changes and Share Now buttons are visible and enabled
+ * - Gutenberg sidebar shows the SchedulePress panel with Social Share Settings
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

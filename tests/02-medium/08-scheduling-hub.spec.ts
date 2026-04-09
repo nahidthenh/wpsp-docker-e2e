@@ -1,13 +1,11 @@
 /**
  * 08-scheduling-hub.spec.ts
  *
- * Verifies the SchedulePress Scheduling Hub tab and its three sub-sections:
- *   - Advanced Schedule  (data-key="layout_advance_schedule")
- *   - Manage Schedule    (data-key="manage-schedule")
- *   - Missed Schedule    (data-key="layout_missed_schedule")
- *
- * All three sub-tabs become visible in the left sidebar after clicking
- * the Scheduling Hub nav item.
+ * Checks the Scheduling Hub section inside SchedulePress Settings.
+ * - Clicking Scheduling Hub reveals Advanced Schedule, Manage Schedule, and Missed Schedule sub-tabs
+ * - Each sub-tab is clickable and loads content without PHP errors
+ * - Advanced Schedule and Missed Schedule panels each have at least one settings field
+ * - The wpsp_settings_v5 WordPress option exists and is valid JSON
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

@@ -1,15 +1,12 @@
 /**
  * 04-schedule-post.spec.ts
  *
- * Creates a scheduled (future) post via WP-CLI, then verifies it through:
- *  1. WP-CLI  — status is "future"
- *  2. wp-admin — appears in Posts › Scheduled list
- *  3. REST API — returns status "future" for authenticated requests
- *  4. Public   — not accessible without authentication
- *  5. Calendar — appears as an event on the SchedulePress calendar
- *
- * Using WP-CLI for post creation is more reliable than driving the
- * block editor UI and avoids flakiness from React rendering delays.
+ * Creates a scheduled post via WP-CLI and verifies it end-to-end.
+ * - WP-CLI reports status "future" and correct title
+ * - Post appears in wp-admin › Posts › Scheduled list
+ * - REST API returns status "future" for authenticated requests
+ * - Unauthenticated REST request returns 401/403/404 (not publicly visible)
+ * - Post appears as an event on the SchedulePress calendar
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

@@ -1,3 +1,17 @@
+/**
+ * 20-post-type-scheduling.spec.ts
+ *
+ * Tests that SchedulePress works correctly for different post types (post and page).
+ * - Scheduling a `post` via WP-CLI sets status to "future"
+ * - Scheduling a `page` via WP-CLI sets status to "future"
+ * - Scheduled page appears in Pages › Scheduled list in wp-admin
+ * - WPSP Gutenberg panel is visible on the new post editor
+ * - WPSP Gutenberg panel is visible on the new page editor (when page type is enabled)
+ * - "Show Post Types" field in Settings includes `post` by default
+ * - Removing `page` from allowed types hides the WPSP panel on the page editor
+ * - Re-adding `page` to allowed types restores the WPSP panel on the page editor
+ */
+
 import { test, expect } from "../../fixtures/base-fixture";
 import { runWpCli, deletePostsByTitlePrefix, dismissWelcomeGuide } from "../../utils/wp-helpers";
 import { SCHEDULE_PRESS } from "../../utils/selectors";

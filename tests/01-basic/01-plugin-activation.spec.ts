@@ -1,14 +1,11 @@
 /**
  * 01-plugin-activation.spec.ts
  *
- * Verifies both SchedulePress (free) and SchedulePress PRO are correctly
- * installed, active, and registered in the WordPress admin.
- *
- * Source-verified facts:
- *  - Free plugin slug : wp-scheduled-posts
- *  - PRO  plugin slug : wp-scheduled-posts-pro
- *  - Main menu slug   : schedulepress   (admin.php?page=schedulepress)
- *  - Calendar slug    : schedulepress-calendar
+ * Checks that both the free and PRO plugins are installed and active.
+ * - Plugin rows appear in wp-admin › Plugins and show "Active"
+ * - SchedulePress menu and Calendar sub-menu appear in the sidebar
+ * - Settings page loads without PHP fatal errors
+ * - WP-CLI confirms both plugins are active
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

@@ -1,17 +1,13 @@
 /**
  * 05-pro-features.spec.ts
  *
- * Basic smoke tests for SchedulePress PRO-only features.
- *
- * PRO features verified (from plugin source wp-scheduled-posts-pro):
- *  - "License" and "Manage Schedule" tabs in Settings
- *  - Post meta fields: _wpscppro_advance_schedule, _wpscp_schedule_draft_date,
- *    _wpscp_schedule_republish_date  (registered for REST exposure)
- *  - Missed-schedule handler (setting: is_active_missed_schedule)
- *  - Publish/Unpublish/Republish — create a published post and verify
- *    the PRO meta fields are writable via REST API
- *
- * All tests are independent and clean up after themselves.
+ * Smoke tests for SchedulePress PRO-only features.
+ * - License and Manage Schedule tabs are visible in Settings
+ * - PRO meta fields (unpublish date, republish date, advance-schedule flag) can be set via WP-CLI
+ * - PRO meta is accessible via the REST API
+ * - Missed-schedule setting exists in the database
+ * - Cron handles a past-dated post (missed schedule)
+ * - Social share meta fields (skip sharing, selected profiles) can be set via WP-CLI
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

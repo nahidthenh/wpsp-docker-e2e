@@ -1,19 +1,11 @@
 /**
  * 18-user-roles.spec.ts
  *
- * Tier 03 — Advanced: Role-based access control for SchedulePress.
- *
- * Verifies:
- *  - Author can schedule their own posts and see them in the Scheduled list
- *  - Author cannot see other users' scheduled posts (WP author scoping)
- *  - Subscriber is blocked from post editor, WPSP settings, and WPSP calendar
- *  - Editor can schedule posts and access the SchedulePress calendar
- *
- * Users:
- *  - admin        → already exists (storageState)
- *  - testauthor   → author role, created by wp-setup.sh (pass: testauthor123)
- *  - e2e-editor   → editor role, created in beforeAll, deleted in afterAll
- *  - e2e-sub      → subscriber role, created in beforeAll, deleted in afterAll
+ * Tests role-based access control for SchedulePress features.
+ * - Author can schedule their own posts and see them in the Scheduled list
+ * - Author cannot see other users' scheduled posts (WordPress author scoping)
+ * - Subscriber is blocked from the post editor, WPSP settings, and WPSP calendar
+ * - Editor can schedule posts, access the calendar, and see all users' posts
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

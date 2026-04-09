@@ -1,14 +1,10 @@
 /**
  * 14-missed-schedule-recovery.spec.ts
  *
- * Tier 03 — Advanced: Missed schedule recovery.
- *
- * A "missed schedule" occurs when a post's publish date passes but WP-Cron
- * did not fire (e.g. no traffic on the site). SchedulePress can recover these
- * posts when its own cron hook runs.
- *
- * Strategy: create posts with a past post_date as status=future (WP marks them
- * as missed), then trigger cron and verify they publish.
+ * Tests recovery of posts that were scheduled but never published (missed schedule).
+ * - Posts created with a past date and status=future are marked as missed
+ * - After cron runs, SchedulePress recovers them and sets status to "publish"
+ * - Multiple missed posts are all recovered in a single cron run
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

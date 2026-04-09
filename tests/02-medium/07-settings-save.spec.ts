@@ -1,17 +1,13 @@
 /**
  * 07-settings-save.spec.ts
  *
- * Verifies that SchedulePress settings persist after saving via the React
- * settings UI. Each test:
- *   1. Navigates to the relevant settings tab
- *   2. Changes a toggle / field value
- *   3. Clicks "Save Changes"
- *   4. Waits for the success response
- *   5. Reloads the page
- *   6. Confirms the value is still persisted
- *
- * Save button: button.components-button.wprf-submit-button
- * Toggle pattern: .wprf-control-wrapper[class*="wprf-name-{field}"] input[type="checkbox"]
+ * Checks that settings changes actually persist after clicking Save.
+ * - Save Changes button is visible and enabled on the General tab
+ * - Dashboard Widget toggle: turning ON/OFF saves and survives a page reload
+ * - Admin Bar toggle: flipping state persists after reload (then restored)
+ * - Publish Immediately button toggle: state persists after reload (then restored)
+ * - Email Notify tab: Under Review and Scheduled notify toggles persist after save
+ * - Social Templates tab: Facebook template value persists after save (then restored)
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

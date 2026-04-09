@@ -1,13 +1,11 @@
 /**
  * 12-full-schedule-to-publish.spec.ts
  *
- * Tier 03 — Advanced: End-to-end scheduling flow.
- *
- * Verifies the core plugin promise: create a post with a future date, confirm
- * it is in "scheduled" state, simulate a cron tick, then verify it publishes
- * correctly and disappears from the scheduled list.
- *
- * All post creation uses WP-CLI; cron is triggered via `wp cron event run`.
+ * End-to-end test of the core scheduling flow: schedule → cron → published.
+ * - Post is created with a future date and gets status "future"
+ * - After cron runs, post status changes to "publish"
+ * - Published post appears in wp-admin › Posts › Published list
+ * - Post disappears from the Scheduled list after publishing
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

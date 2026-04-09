@@ -1,20 +1,11 @@
 /**
  * 03-calendar.spec.ts
  *
- * Verifies the SchedulePress Calendar page (admin.php?page=schedulepress-calendar).
- *
- * DOM reality (confirmed by live inspection):
- *  - SchedulePress sets FullCalendar's headerToolbar to display:none
- *  - It renders its OWN navigation toolbar inside .wpsp-calender-content > .toolbar
- *  - The custom toolbar structure (verified from DOM):
- *      .toolbar
- *        .left   → post-type filter (checkbox-select)
- *        .middle → .calender-selected-month  ("April 2026" + dropdown)
- *        .right  → button.wpsp-prev-button | button.wpsp-next-button | button.today-btn
- *
- * FullCalendar selectors that ARE visible: .fc, .fc-daygrid, .fc-event
- * FullCalendar selectors that are HIDDEN:  .fc-header-toolbar, .fc-toolbar-title,
- *                                           button.fc-prev-button, button.fc-today-button
+ * Checks the SchedulePress Calendar page loads and navigation works.
+ * - Page returns 200, no PHP errors, FullCalendar grid renders
+ * - Custom toolbar shows current month/year with Prev / Next / Today buttons
+ * - Clicking Next changes the month; clicking Prev restores it
+ * - Clicking Today always returns to the current month
  */
 
 import { test, expect } from "../../fixtures/base-fixture";

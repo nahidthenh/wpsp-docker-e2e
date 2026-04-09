@@ -1,18 +1,12 @@
 /**
  * 09-dashboard-widget.spec.ts
  *
- * Verifies the SchedulePress "Scheduled Posts" dashboard widget on /wp-admin/.
- *
- * DOM structure (confirmed by live inspection):
- *   #wp_scp_dashboard_widget                    → widget postbox container
- *     .postbox-header h2.hndle                  → "Scheduled Posts" title
- *     button.handlediv[aria-expanded]           → collapse/expand toggle
- *     .inside                                   → widget body content
- *       "No post is scheduled." (when empty)
- *       or list of scheduled posts
- *
- * Note: The widget is enabled by default in this install.
- * Tests that toggle the widget setting in General tab will save + restore state.
+ * Checks the "Scheduled Posts" dashboard widget on /wp-admin/.
+ * - Widget is visible with the correct title
+ * - Widget body renders and can be collapsed/expanded via the toggle button
+ * - Shows "No post is scheduled" when empty; shows post title when one is scheduled
+ * - Count matches the actual number of scheduled posts (verified via WP-CLI)
+ * - Disabling the Dashboard Widget toggle in Settings hides the widget; re-enabling restores it
  */
 
 import { test, expect } from "../../fixtures/base-fixture";
