@@ -60,12 +60,27 @@ test.describe("SchedulePress – User Role Access", () => {
   let subId: string;
   let adminPostId: string;   // scheduled post owned by admin
   let authorPostId: string;  // scheduled post owned by testauthor
+  let originalAllowedRoles: string; // SchedulePress "Allow users" setting backup
 
   // ── Setup: create temp users + test posts ──────────────────────────────────
 
   test.beforeAll(() => {
     const future = new Date(Date.now() + 2 * 3600 * 1000)
       .toISOString().slice(0, 19).replace("T", " ");
+
+    // Allow editor + author roles in SchedulePress (default is administrator only).
+    // wpsp_settings_v5 is stored as a JSON-encoded string, so we read/write it
+    // via wp eval with json_decode/json_encode — option patch does not work on strings.
+    try {
+      originalAllowedRoles = runWpCli(
+        `eval '$r = get_option("wpsp_settings_v5","{}"); $o = is_array($r)?$r:json_decode($r,true); echo json_encode($o["user_role"] ?? []);'`
+      ).trim();
+    } catch {
+      originalAllowedRoles = "";
+    }
+    runWpCli(
+      `eval '$r = get_option("wpsp_settings_v5","{}"); $o = is_array($r)?$r:json_decode($r,true); if(!is_array($o))$o=[]; $o["user_role"]=["administrator","editor","author"]; update_option("wpsp_settings_v5", is_array($r)?$o:json_encode($o));'`
+    );
 
     // Create editor user
     editorId = runWpCli(
@@ -101,10 +116,18 @@ test.describe("SchedulePress – User Role Access", () => {
   // ── Teardown: remove temp users + test posts ───────────────────────────────
 
   test.afterAll(() => {
-    try { runWpCli(`user delete ${editorId} --yes`); } catch { /* ignore */ }
-    try { runWpCli(`user delete ${subId} --yes`); } catch { /* ignore */ }
-    try { runWpCli(`post delete ${adminPostId} --force`); } catch { /* ignore */ }
-    try { runWpCli(`post delete ${authorPostId} --force`); } catch { /* ignore */ }
+    // Restore original SchedulePress "Allow users" setting
+    if (originalAllowedRoles) {
+      try {
+        runWpCli(
+          `eval '$r = get_option("wpsp_settings_v5","{}"); $o = is_array($r)?$r:json_decode($r,true); if(!is_array($o))$o=[]; $o["user_role"]=json_decode(${JSON.stringify(originalAllowedRoles)},true); update_option("wpsp_settings_v5", is_array($r)?$o:json_encode($o));'`
+        );
+      } catch { /* ignore */ }
+    }
+    if (editorId) { try { runWpCli(`user delete ${editorId} --yes`); } catch { /* ignore */ } }
+    if (subId) { try { runWpCli(`user delete ${subId} --yes`); } catch { /* ignore */ } }
+    if (adminPostId) { try { runWpCli(`post delete ${adminPostId} --force`); } catch { /* ignore */ } }
+    if (authorPostId) { try { runWpCli(`post delete ${authorPostId} --force`); } catch { /* ignore */ } }
     deletePostsByTitlePrefix(PREFIX);
   });
 
@@ -195,15 +218,13 @@ test.describe("SchedulePress – User Role Access", () => {
     }
   });
 
-  test("editor can view the SchedulePress calendar page", async ({ page }) => {
+  test("editor can't view the SchedulePress calendar page", async ({ page }) => {
     await loginAs(page, EDITOR_USER, EDITOR_PASS);
-    await page.goto("/wp-admin/edit.php?page=schedulepress-post", {
+    await page.goto("/wp-admin/admin.php?page=schedulepress-calendar", {
       waitUntil: "domcontentloaded",
     });
     const body = await page.locator("body").textContent() ?? "";
-
-    expect(body).not.toMatch(/you do not have|not allowed|sorry, you are not/i);
-    await expect(page.locator(".fc")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Sorry, you are not allowed to')).toBeVisible();
   });
 
   test("editor can access the SchedulePress settings page", async ({ page }) => {

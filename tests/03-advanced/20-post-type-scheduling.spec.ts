@@ -139,11 +139,6 @@ test.describe("SchedulePress – Post Type Scheduling", () => {
     await expect(adminPage.locator(WPSP_PANEL)).toBeVisible({ timeout: 15_000 });
   });
 
-  test("WPSP panel is visible on new `page` editor", async ({ adminPage }) => {
-    await openEditor(adminPage, "page");
-    await expect(adminPage.locator(WPSP_PANEL)).toBeVisible({ timeout: 15_000 });
-  });
-
   test('"Show Post Types" field is visible and includes `post`', async ({ adminPage }) => {
     await openGeneralTab(adminPage);
     const wrapper = postTypesWrapper(adminPage);
@@ -191,4 +186,11 @@ test.describe("SchedulePress – Post Type Scheduling", () => {
 
     await openEditor(adminPage, "page");
   });
+
+  test("WPSP panel is visible on new `page` editor", async ({ adminPage }) => {
+    await openEditor(adminPage, "page");
+    await adminPage.getByRole('button', { name: 'Close' }).click();
+    await expect(adminPage.locator(WPSP_PANEL)).toBeVisible({ timeout: 15_000 });
+  });
+
 });
