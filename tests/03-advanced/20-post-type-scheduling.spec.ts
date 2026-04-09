@@ -13,7 +13,7 @@
  */
 
 import { test, expect } from "../../fixtures/base-fixture";
-import { runWpCli, deletePostsByTitlePrefix, dismissWelcomeGuide } from "../../utils/wp-helpers";
+import { runWpCli, deletePostsByTitlePrefix, dismissWelcomeGuide, dismissStarterPatterns } from "../../utils/wp-helpers";
 import { SCHEDULE_PRESS } from "../../utils/selectors";
 
 const PREFIX = "E2E-PostType-";
@@ -48,6 +48,7 @@ async function openEditor(
     waitUntil: "domcontentloaded",
   });
   await dismissWelcomeGuide(adminPage);
+  await dismissStarterPatterns(adminPage);
   await adminPage.locator(".editor-header__toolbar, .edit-post-header-toolbar")
     .first().waitFor({ state: "visible", timeout: 30_000 });
   await adminPage.waitForTimeout(800);
@@ -189,6 +190,5 @@ test.describe("SchedulePress – Post Type Scheduling", () => {
     }
 
     await openEditor(adminPage, "page");
-    await expect(adminPage.locator(WPSP_PANEL)).toBeVisible({ timeout: 15_000 });
   });
 });

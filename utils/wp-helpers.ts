@@ -60,6 +60,25 @@ export async function dismissWelcomeGuide(page: Page): Promise<void> {
   await modal.waitFor({ state: 'hidden' }).catch(() => { });
 }
 
+/**
+ * Dismiss the "Choose a pattern" starter modal that WordPress shows when
+ * creating a new page. It only appears on pages, not on posts, and only
+ * when the active theme ships starter patterns (e.g. Twenty Twenty-Four).
+ */
+export async function dismissStarterPatterns(page: Page): Promise<void> {
+  const modal = page.locator(".editor-start-page-options__modal");
+  try {
+    await modal.waitFor({ state: "visible", timeout: 5_000 });
+  } catch {
+    return; // Modal did not appear — nothing to dismiss
+  }
+  const closeBtn = modal.locator('button[aria-label="Close"]');
+  if (await closeBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    await closeBtn.click();
+  }
+  await modal.waitFor({ state: "hidden", timeout: 5_000 }).catch(() => {});
+}
+
 export async function gotoNewPost(page: Page): Promise<void> {
   await page.goto("/wp-admin/post-new.php", { waitUntil: "domcontentloaded" });
   await dismissWelcomeGuide(page);

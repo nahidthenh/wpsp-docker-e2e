@@ -11,7 +11,7 @@
  */
 
 import { test, expect } from "../../fixtures/base-fixture";
-import { dismissWelcomeGuide } from "../../utils/wp-helpers";
+import { dismissWelcomeGuide, dismissStarterPatterns } from "../../utils/wp-helpers";
 
 /** Wait for Gutenberg toolbar and the plugin button — replaces fixed timeouts. */
 async function waitForEditorReady(adminPage: import("@playwright/test").Page): Promise<void> {
@@ -53,8 +53,9 @@ test.describe("SchedulePress Post Panel – Schedule And Share", () => {
   test.beforeEach(async ({ adminPage }) => {
     await adminPage.goto("/wp-admin/post-new.php?post_type=post", { waitUntil: "domcontentloaded" });
 
-    // Dismiss Welcome Guide first — on CI (fresh install) it always appears
+    // Dismiss Welcome Guide and "Choose a pattern" modal (page-only but safe to call on posts)
     await dismissWelcomeGuide(adminPage);
+    await dismissStarterPatterns(adminPage);
 
     // Wait for editor + plugin React app to be fully ready (no fixed timeouts)
     await waitForEditorReady(adminPage);

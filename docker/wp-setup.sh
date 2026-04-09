@@ -96,12 +96,13 @@ wp rewrite flush --hard --path="${WP_PATH}" --allow-root
 # ── Disable email notifications (avoids test noise) ─────────────────────────
 wp option update admin_email_lifespan 999999999 --path="${WP_PATH}" --allow-root
 
-# ── Disable Gutenberg Welcome Guide for all existing users ───────────────────
-# Gutenberg stores preferences in wp_persisted_preferences (JSON) under core/edit-post.
-echo "🚫 Disabling Gutenberg Welcome Guide for all users..."
+# ── Disable Gutenberg Welcome Guide and Starter Patterns modal ───────────────
+# wp_persisted_preferences controls both the Welcome Guide and the
+# "Choose a pattern" modal that appears when creating new pages.
+echo "🚫 Disabling Gutenberg Welcome Guide and Starter Patterns modal for all users..."
 wp user list --field=ID --path="${WP_PATH}" --allow-root | while read -r uid; do
   wp user meta update "$uid" wp_persisted_preferences \
-    '{"core/edit-post":{"welcomeGuide":false},"core/edit-site":{"welcomeGuide":false}}' \
+    '{"core/edit-post":{"welcomeGuide":false,"enableChoosePatternModal":false},"core/edit-site":{"welcomeGuide":false}}' \
     --path="${WP_PATH}" --allow-root 2>/dev/null || true
 done
 
