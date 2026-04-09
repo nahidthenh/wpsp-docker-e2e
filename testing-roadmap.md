@@ -201,7 +201,7 @@
 | Spec | Tests | Priority | What it proves |
 |---|---|---|---|
 | `18-user-roles.spec.ts` | 11 | ✅ Done | Role-based access to scheduling, calendar, and social options |
-| `19-timezone.spec.ts` | ~5 | 🔴 High | Posts publish at correct UTC time with offset and location-based timezone |
+| `19-timezone.spec.ts` | 7 | ✅ Done | Posts publish at correct UTC time with offset and location-based timezone |
 | `20-post-type-scheduling.spec.ts` | ~6 | 🟡 Medium | Scheduling works for post/page/custom post types per settings |
 
 ### `18-user-roles.spec.ts` (~8 tests)
@@ -282,7 +282,7 @@
 ✅ Phase 16:  16-advanced-schedule         Advanced — PRO multi-date schedule meta + Gutenberg
 ✅ Phase 17:  17-api-security              Advanced — REST auth, role boundaries, nonce protection
 ✅ Phase 18:  18-user-roles               New — role-based scheduling + calendar access
-🔲 Phase 19:  19-timezone                 New — UTC offset and location-based scheduling accuracy
+✅ Phase 19:  19-timezone                 New — UTC offset and location-based scheduling accuracy
 🔲 Phase 20:  20-post-type-scheduling     New — post/page/custom type scheduling per settings
 ```
 
