@@ -32,12 +32,15 @@ function wpDate(offsetSeconds: number): string {
  *   - Must sleep ≥ 10s before first runWpCron so the 10s debounce has expired.
  *   - CRON_DATE_SECONDS must be > ~35s so meta date is still future when first cron fires.
  */
-const CRON_DATE_SECONDS = 45; // meta date set 45 seconds from now
+// Meta date is set this many seconds from now.
+// Must be > 22 (first sleep) so the date is still future when wpsp_pro_update_post fires.
+// Must be < 22 + 30 = 52 so the date has passed when the second cron runs.
+const CRON_DATE_SECONDS = 45;
 
 function runCronChain(): void {
-  sleep(22); // wait for wpsp_pro_update_post to be due (scheduled time()+20) and debounce to expire (10s)
-  runWpCron(); // step 1: wpsp_pro_update_post → schedules wcscp_pro_schedule_republish/unpublish
-  sleep(15); // wait for meta date to pass (set to T+45; by now T+37, need ~8 more seconds)
+  sleep(22); // wait for wpsp_pro_update_post to be due (time()+20) and debounce to expire (10s)
+  runWpCron(); // step 1: wpsp_pro_update_post fires → schedules wcscp_pro_schedule_republish/unpublish at T+45
+  sleep(30);  // wait until T=52 so the meta date (T+45) has passed before second cron runs
   runWpCron(); // step 2: wcscp_pro_schedule_republish/unpublish fires → status changes
 }
 

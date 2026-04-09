@@ -154,6 +154,7 @@ jobs:
         uses: actions/deploy-pages@v4
         if: always()
         id: deploy-pages
+        continue-on-error: true
 
       - name: Write report URL to job summary
         if: always()

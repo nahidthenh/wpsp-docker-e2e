@@ -24,8 +24,13 @@ const PREFIX       = "E2E-Roles-";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Log in as a given user by filling wp-login.php — replaces current session. */
+/**
+ * Log in as a given user by filling wp-login.php — replaces current session.
+ * Cookies are cleared first so WordPress does not redirect away from the login
+ * page when the global admin storageState is already active.
+ */
 async function loginAs(page: Page, username: string, password: string): Promise<void> {
+  await page.context().clearCookies();
   await page.goto("/wp-login.php", { waitUntil: "domcontentloaded" });
   await page.locator("#user_login").fill(username);
   await page.locator("#user_pass").fill(password);

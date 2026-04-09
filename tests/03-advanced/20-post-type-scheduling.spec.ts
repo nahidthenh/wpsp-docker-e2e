@@ -51,6 +51,28 @@ async function openEditor(
   await adminPage.locator(".editor-header__toolbar, .edit-post-header-toolbar")
     .first().waitFor({ state: "visible", timeout: 30_000 });
   await adminPage.waitForTimeout(800);
+
+  // Ensure the Gutenberg sidebar is open and the SchedulePress panel is expanded.
+  // On CI the panel loads in a collapsed state — WPSP_PANEL is visible but its
+  // content (including the panel toggle check) requires it to be expanded.
+  const sidebar = adminPage.locator(".interface-interface-skeleton__sidebar");
+  if (!(await sidebar.isVisible({ timeout: 3_000 }).catch(() => false))) {
+    const settingsBtn = adminPage.locator('button[aria-label="Settings"]').first();
+    if (await settingsBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await settingsBtn.click();
+      await sidebar.waitFor({ state: "visible", timeout: 5_000 });
+    }
+  }
+  const toggle = adminPage.locator(
+    ".components-panel__body.schedulepress-options button.components-panel__body-toggle"
+  );
+  if (await toggle.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    const expanded = await toggle.getAttribute("aria-expanded");
+    if (expanded === "false") {
+      await toggle.click();
+      await adminPage.waitForTimeout(300);
+    }
+  }
 }
 
 function postTypesWrapper(adminPage: import("@playwright/test").Page) {

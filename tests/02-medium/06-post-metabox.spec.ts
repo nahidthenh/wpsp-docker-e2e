@@ -31,6 +31,23 @@ async function ensureSidebarOpen(adminPage: import("@playwright/test").Page): Pr
   }
 }
 
+/**
+ * Expand the SchedulePress sidebar panel if it is collapsed.
+ * On CI the panel loads in collapsed state — social accordion items
+ * are inside the panel body and are not visible until it is opened.
+ */
+async function ensureSchedulePressPanel(adminPage: import("@playwright/test").Page): Promise<void> {
+  const toggle = adminPage.locator(
+    ".components-panel__body.schedulepress-options button.components-panel__body-toggle"
+  );
+  await toggle.waitFor({ state: "visible", timeout: 10_000 });
+  const expanded = await toggle.getAttribute("aria-expanded");
+  if (expanded === "false") {
+    await toggle.click();
+    await adminPage.waitForTimeout(300);
+  }
+}
+
 test.describe("SchedulePress Post Panel – Schedule And Share", () => {
 
   test.beforeEach(async ({ adminPage }) => {
@@ -42,8 +59,9 @@ test.describe("SchedulePress Post Panel – Schedule And Share", () => {
     // Wait for editor + plugin React app to be fully ready (no fixed timeouts)
     await waitForEditorReady(adminPage);
 
-    // Ensure sidebar is visible for sidebar-dependent tests
+    // Ensure sidebar is open and the SchedulePress panel inside is expanded
     await ensureSidebarOpen(adminPage);
+    await ensureSchedulePressPanel(adminPage);
   });
 
   // ── Trigger button ─────────────────────────────────────────────────────
