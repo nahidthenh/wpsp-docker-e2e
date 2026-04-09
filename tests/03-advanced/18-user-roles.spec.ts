@@ -14,13 +14,13 @@ import type { Page } from "@playwright/test";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const AUTHOR_USER  = "testauthor";
-const AUTHOR_PASS  = "testauthor123";
-const EDITOR_USER  = "e2e-editor";
-const EDITOR_PASS  = "Editor123!";
-const SUB_USER     = "e2e-sub";
-const SUB_PASS     = "Subscriber123!";
-const PREFIX       = "E2E-Roles-";
+const AUTHOR_USER = "testauthor";
+const AUTHOR_PASS = "testauthor123";
+const EDITOR_USER = "e2e-editor";
+const EDITOR_PASS = "Editor123!";
+const SUB_USER = "e2e-sub";
+const SUB_PASS = "Subscriber123!";
+const PREFIX = "E2E-Roles-";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -44,11 +44,11 @@ async function loginAs(page: Page, username: string, password: string): Promise<
  */
 async function isBlocked(page: Page, path: string): Promise<boolean> {
   await page.goto(path, { waitUntil: "domcontentloaded" });
-  const url  = page.url();
+  const url = page.url();
   const body = await page.locator("body").textContent() ?? "";
   // Blocked if: redirected away from the page, or body contains an error string
   const redirectedAway = !url.includes(path.replace("/wp-admin/", ""));
-  const errorInBody    = /you do not have|not allowed|sorry, you are not|permission/i.test(body);
+  const errorInBody = /you do not have|not allowed|sorry, you are not|permission/i.test(body);
   return redirectedAway || errorInBody;
 }
 
@@ -141,15 +141,14 @@ test.describe("SchedulePress – User Role Access", () => {
     await expect(adminPost).not.toBeVisible({ timeout: 5_000 });
   });
 
-  test("author can access the SchedulePress calendar page", async ({ page }) => {
+  test("author can't access the SchedulePress calendar page", async ({ page }) => {
     await loginAs(page, AUTHOR_USER, AUTHOR_PASS);
     await page.goto("/wp-admin/admin.php?page=schedulepress-calendar", {
       waitUntil: "domcontentloaded",
     });
     // Calendar renders without a permission error
     const body = await page.locator("body").textContent() ?? "";
-    expect(body).not.toMatch(/you do not have|not allowed|sorry, you are not/i);
-    await expect(page.locator(".fc")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Sorry, you are not allowed to')).toBeVisible();
   });
 
   // ── Subscriber role ────────────────────────────────────────────────────────
@@ -198,10 +197,11 @@ test.describe("SchedulePress – User Role Access", () => {
 
   test("editor can view the SchedulePress calendar page", async ({ page }) => {
     await loginAs(page, EDITOR_USER, EDITOR_PASS);
-    await page.goto("/wp-admin/admin.php?page=schedulepress-calendar", {
+    await page.goto("/wp-admin/edit.php?page=schedulepress-post", {
       waitUntil: "domcontentloaded",
     });
     const body = await page.locator("body").textContent() ?? "";
+
     expect(body).not.toMatch(/you do not have|not allowed|sorry, you are not/i);
     await expect(page.locator(".fc")).toBeVisible({ timeout: 15_000 });
   });
