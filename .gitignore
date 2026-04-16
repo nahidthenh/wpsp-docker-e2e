@@ -7,5 +7,8 @@ playwright-report/
 test-results/
 playwright/.auth/
 
+# Generated test files (created by branch-driven test generation workflow)
+tests/generated/*.spec.ts
+
 # macOS
 .DS_Store

@@ -16,7 +16,11 @@
     "docker:down": "docker-compose down",
     "docker:reset": "docker-compose down -v && docker-compose up -d && bash docker/wait-for-wp.sh",
     "cron:run": "docker-compose exec -T wpcli wp cron event run --due-now --path=/var/www/html --allow-root",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "branch:setup": "bash scripts/setup-branch.sh",
+    "test:generated": "playwright test tests/generated/",
+    "test:regression": "playwright test tests/regression/",
+    "test:branch-full": "playwright test tests/generated/ tests/regression/"
   },
   "devDependencies": {
     "@playwright/test": "^1.44.0",

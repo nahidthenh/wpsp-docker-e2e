@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       test_pattern:
-        description: "Test file pattern (e.g. tests/03-advanced/*.spec.ts). Leave blank to run all."
+        description: "Test file pattern (e.g. tests/regression/03-advanced/*.spec.ts or tests/generated/). Leave blank to run all."
         required: false
         default: ""
       free_branch:
