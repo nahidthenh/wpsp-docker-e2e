@@ -1,0 +1,16 @@
+{
+  "freeBranch": "73647-new",
+  "proBranch":  "73647-new",
+  "startedAt":  "2026-05-05T06:09:43Z",
+  "schedDate":  "2026-05-05 12:20:01",
+  "schedDate2": "2026-05-05 12:32:01",
+  "posts": {
+    "T1": { "id": "4",  "type": "post", "feature": "Standard Schedule",  "expected": "publish" },
+    "T2": { "id": "5",  "type": "page", "feature": "Standard Schedule",  "expected": "publish" },
+    "T3": { "id": "6",  "type": "post", "feature": "Advanced Schedule",  "expected": "publish" },
+    "T4": { "id": "7",  "type": "post", "feature": "Republish",          "expected": "publish" },
+    "T5": { "id": "8",  "type": "post", "feature": "Unpublish",          "expected": "draft"   },
+    "T6": { "id": "9",  "type": "post", "feature": "Auto-Schedule",      "expected": "future"  },
+    "T7": { "id": "10", "type": "post", "feature": "Manual Schedule",    "expected": "publish" }
+  }
+}
